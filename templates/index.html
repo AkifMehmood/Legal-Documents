@@ -1170,6 +1170,39 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
 }
 .message.agent { align-self: flex-start; background: #f8fafc; border: 1px solid #e2e8f0; }
 .message.user { align-self: flex-end; background: #e5e7eb; border: 1px solid #cbd5e1; }
+
+/* Thinking animation styles */
+.message.thinking {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #086ad8;
+}
+
+.thinking-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 18px;
+  color: #374151;
+}
+
+.thinking-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #c0c0c0;
+  opacity: 0;
+  animation: dotAppear 1.4s infinite;
+}
+
+.thinking-dots .dot:nth-child(1) { animation-delay: 0s; }
+.thinking-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotAppear {
+  0%, 20% { opacity: 0; }
+  40%, 100% { opacity: 1; }
+}
 .message p { margin: 4px 0; }
 .message ul { margin: 6px 0 6px 18px; padding: 0; list-style: disc; }
 .message li { margin: 2px 0; }
@@ -1917,6 +1950,11 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
 
 /* Prevent scrolling when review form is open */
 body.review-open {
+  overflow: hidden;
+}
+
+/* Prevent scrolling when chat modal is open */
+body.chat-modal-open {
   overflow: hidden;
 }
 
@@ -2796,7 +2834,7 @@ button[type="submit"]:hover {
   left: 20px; /* shift more to the right per request */
   width: calc(100% - 20px);
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -2896,7 +2934,7 @@ button[type="submit"]:hover {
   border-bottom: 1px solid #e5e7eb;
   padding: 20px;
   max-height: 200px;
-  overflow-y: auto;
+  overflow: hidden;
   border-radius: 0 0 16px 16px;
 }
 
@@ -2913,6 +2951,13 @@ button[type="submit"]:hover {
   overflow-y: auto;
   padding: 20px;
   background: #fff;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.chat-messages-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .chat-messages-container .chat-welcome {
@@ -3421,7 +3466,7 @@ textarea {
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  width: 140px;
+  width: 180px;
   height: 48px;
   justify-content: center;
 }
@@ -3896,15 +3941,7 @@ textarea {
   border: 1px solid #e5e7eb;
 }
 
-/* Special styling for Audio Upload panel header (title only) */
-#voiceAssistant .panel-header {
-  justify-content: center;
-  order: -1;
-}
-
-#voiceAssistant {
-  flex-direction: column;
-}
+/* Audio Upload panel styling removed - functionality moved to case form */
 
 /* Special styling for PDF Auto Fill panel header (title only) */
 #pdfAutoFillPanel .panel-header {
@@ -4044,10 +4081,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
       <div class="doc-icon"><i class="fa-solid fa-file-alt"></i></div>
     </div>
 
-    <div class="doc-item" onclick="setSecondActive(this); openVoiceScreen()">
-      <span>Audio Upload</span>
-      <div class="doc-icon"><i class="fa-solid fa-microphone"></i></div>
-    </div>
+    <!-- Audio Upload removed - functionality moved to case form -->
 
     <div class="doc-item" onclick="setSecondActive(this); showPdfAutoFillPanel()">
       <span>PDF Auto Fill Form</span>
@@ -4169,37 +4203,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
       </div>
     </div>
   
-    <div id="voiceAssistant" class="chat-panel" style="display:none; position:relative;">
-      <div class="panel-header">
-        <h3><i class="fa-solid fa-microphone"></i> AI Audio Assistant</h3>
-      </div>
-      <div class="upload-grid">
-        <div>
-          <div class="dropzone" id="voiceDropzone" style="margin-bottom:12px;">
-            <i class="fa-solid fa-microphone"></i>
-            <div><strong>Audio Upload</strong></div>
-            <div class="help-text">.mp3, .wav, .m4a, .ogg</div>
-            <input id="voiceFileInput" type="file" accept=".mp3,.wav,.m4a,.ogg" style="display:none" />
-          </div>
-      <div class="actions">
-        <button id="voiceSummaryBtn" class="btn btn-primary hidden"><i class="fa-solid fa-align-left"></i> Generate Summary</button>
-      </div>
-      <div class="summary-section">
-        <label for="voiceSummaryText">Summary</label>
-        <textarea id="voiceSummaryText" class="summary-textarea" placeholder="Summary will appear here after Generate Summary..."></textarea>
-        <div class="footer-actions" id="voiceActions" style="margin-top:8px; display:none;">
-          <select id="voiceFormatSelect" class="input-select">
-            <option value="txt">.txt</option>
-            <option value="pdf">.pdf</option>
-            <option value="docx">.docx</option>
-          </select>
-          <button id="voiceDownloadBtn" class="btn btn-secondary"><i class="fa-solid fa-download"></i> Download</button>
-        </div>
-      </div>
-        </div>
-    <div class="right-pane" style="display:none"></div>
-      </div>
-    </div>
+    <!-- Voice Assistant panel removed - functionality moved to case form -->
 
 <!-- PDF Auto Fill Container -->
 <div id="pdfAutoFillPanel" class="chat-panel pdf-container" style="display:none">
@@ -4620,6 +4624,60 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     <div id="caseSelectedName" style="margin-top:6px; font-size:12px; color:#374151;"></div>
   </div>
 
+  <div class="form-group">
+    <label for="caseAudioFile">Upload Audio</label>
+    <div class="simple-file-upload">
+    <input type="file" id="caseAudioFile" accept=".mp3,.wav,.m4a,.ogg" onchange="handleCaseAudioSelection()">
+      <div class="file-upload-placeholder">
+        <i class="fa-solid fa-microphone"></i>
+        <span>Choose Audio File</span>
+        <small>No audio file chosen</small>
+        <em>or drag and drop</em>
+      </div>
+    </div>
+    <div id="caseAudioSelectedName" style="margin-top:6px; font-size:12px; color:#374151;"></div>
+  </div>
+
+  <div class="form-group full-width" id="audioAnalysisSection" style="display: none;">
+    <label>Audio Analysis Results</label>
+    <div class="analysis-modal-body" style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-top: 10px;">
+      <div class="analysis-modal-section" style="margin-bottom: 20px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #374151; margin-bottom: 8px;">
+          <i class="fa-solid fa-file-text" style="color: #2563eb;"></i> Summary
+        </label>
+        <div class="analysis-modal-text" id="audioAnalysisSummary" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; min-height: 60px; color: #374151;"></div>
+      </div>
+      <div class="analysis-modal-section" style="margin-bottom: 20px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #374151; margin-bottom: 8px;">
+          <i class="fa-solid fa-exclamation-triangle" style="color: #f59e0b;"></i> Missing Clauses
+        </label>
+        <div class="analysis-modal-text" id="audioAnalysisMissingClauses" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; min-height: 60px; color: #374151;"></div>
+      </div>
+      <div class="analysis-modal-section" style="margin-bottom: 20px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #374151; margin-bottom: 8px;">
+          <i class="fa-solid fa-shield-alt" style="color: #dc2626;"></i> Risky Language
+        </label>
+        <div class="analysis-modal-text" id="audioAnalysisRiskyLanguage" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; min-height: 60px; color: #374151;"></div>
+      </div>
+      <div class="analysis-modal-section" style="margin-bottom: 20px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #374151; margin-bottom: 8px;">
+          <i class="fa-solid fa-lightbulb" style="color: #059669;"></i> Suggestions
+        </label>
+        <div class="analysis-modal-text" id="audioAnalysisSuggestions" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; min-height: 60px; color: #374151;"></div>
+      </div>
+    </div>
+    <div class="footer-actions" id="audioActions" style="margin-top:16px; display:none; justify-content: center; gap: 12px;">
+      <select id="audioFormatSelect" class="input-select" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #ffffff;">
+        <option value="txt">.txt</option>
+        <option value="pdf">.pdf</option>
+        <option value="docx">.docx</option>
+      </select>
+      <button id="audioDownloadBtn" class="btn btn-secondary" onclick="downloadAudioAnalysis()" style="padding: 8px 16px;">
+        <i class="fa-solid fa-download"></i> Download Analysis
+      </button>
+    </div>
+  </div>
+
   <div class="form-group full-width" style="display: none;">
     <label for="caseDocumentPreview">Document Preview (for Agent)</label>
     <textarea id="caseDocumentPreview" class="form-textarea" placeholder="Document content will be automatically extracted and saved here for AI agent to answer questions..." readonly style="display: none;"></textarea>
@@ -4629,6 +4687,9 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     <button type="submit" id="caseSubmitBtn" class="btn btn-primary">Submit</button>
     <button type="button" id="analyzeCaseBtn" class="btn btn-info" onclick="analyzeCaseDocument()" style="margin-left: 10px; display: none;">
       <i class="fa-solid fa-chart-line"></i> Analyze
+    </button>
+    <button type="button" id="processAudioBtn" class="btn btn-info" onclick="processCaseAudio()" style="margin-left: 10px; display: none;">
+      <i class="fa-solid fa-microphone"></i> Process Audio
     </button>
     <button type="button" onclick="closeCaseForm()" class="btn btn-secondary">Cancel</button>
   </div>
@@ -5418,7 +5479,10 @@ function sendMessage(){
     msg.textContent = text;
     msgContainer.appendChild(msg);
     input.value = '';
-    msgContainer.scrollTop = msgContainer.scrollHeight;
+
+
+    // Show thinking animation
+    const thinkingEl = showThinkingAnimation(msgContainer);
 
     // Get document preview for context
     const previewText = document.getElementById('docPreviewText')?.value || 
@@ -5436,6 +5500,9 @@ function sendMessage(){
     })
     .then(res => res.json())
     .then(data => {
+      // Hide thinking animation
+      hideThinkingAnimation(thinkingEl);
+      
       const agentMsg = document.createElement('div');
       agentMsg.classList.add('message', 'agent');
       
@@ -5451,24 +5518,42 @@ function sendMessage(){
       
       agentMsg.innerHTML = formatAgentAnswer(responseText);
       msgContainer.appendChild(agentMsg);
-      msgContainer.scrollTop = msgContainer.scrollHeight;
+  
       // Persist both messages in history
       appendMessageToHistory('user', text);
       appendMessageToHistory('agent', agentMsg.innerHTML);
     })
     .catch(() => {
+      // Hide thinking animation
+      hideThinkingAnimation(thinkingEl);
+      
       const agentMsg = document.createElement('div');
       agentMsg.classList.add('message', 'agent');
       agentMsg.innerHTML = formatAgentAnswer("Server error. Try again.");
       msgContainer.appendChild(agentMsg);
-      msgContainer.scrollTop = msgContainer.scrollHeight;
+  
       appendMessageToHistory('user', text);
       appendMessageToHistory('agent', agentMsg.innerHTML);
     });
   }
 }
 
-// Add basic formatting for agent text: headings and bullet points
+// Add thinking animation function
+function showThinkingAnimation(container) {
+  const thinkingEl = document.createElement('div');
+  thinkingEl.classList.add('message', 'agent', 'thinking');
+  thinkingEl.innerHTML = '<div class="thinking-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+  container.appendChild(thinkingEl);
+
+  return thinkingEl;
+}
+
+function hideThinkingAnimation(thinkingEl) {
+  if (thinkingEl && thinkingEl.parentNode) {
+    thinkingEl.parentNode.removeChild(thinkingEl);
+  }
+}
+
 function formatAgentAnswer(text){
   if(!text) return '';
   let html = text
@@ -5505,8 +5590,7 @@ function ensureChatWelcome() {
     welcome.id = 'chatWelcome';
     welcome.className = 'chat-welcome';
     welcome.innerHTML = `<div>
-      <h3 style="margin:0 0 6px 0; color:#111;">Hello Akif</h3>
-      <div>Welcome to the chat. Ask anything and I will help you.</div>
+      <h3 style="margin:0 0 6px 0; color:#111;">Hi! how can i help you today?</h3>
     </div>`;
     container.appendChild(welcome);
   }
@@ -5522,7 +5606,7 @@ function addMessage(text, role, options = {}){
   // Agent may include simple formatting
   div.innerHTML = role==='agent' ? formatAgentAnswer(text) : text;
   container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+
   // also persist to current chat
   if(!skipHistory && (role==='agent' || role==='user')) appendMessageToHistory(role, div.innerHTML);
   return div;
@@ -5559,6 +5643,10 @@ function startVoiceToAgent() {
     const voiceText = event.results[0][0].transcript;
     addMessage("🎤 " + voiceText, "user");
 
+    // Show thinking animation
+    const container = document.getElementById('chatMessages');
+    const thinkingEl = showThinkingAnimation(container);
+
     // Get document preview for context
     const previewText = document.getElementById('docPreviewText')?.value || 
                        window.documentText || 
@@ -5575,9 +5663,13 @@ function startVoiceToAgent() {
     })
     .then(res => res.json())
     .then(data => {
+      // Hide thinking animation
+      hideThinkingAnimation(thinkingEl);
       addMessage(data.answer || "❌ Agent could not answer the voice question.", "agent");
     })
     .catch(() => {
+      // Hide thinking animation
+      hideThinkingAnimation(thinkingEl);
       addMessage("❌ Voice question failed. Please try again.", "agent");
     });
   };
@@ -5592,14 +5684,12 @@ function showSecondSidebar(type) {
   const sidebar = document.getElementById('secondSidebar');
   const chatPanel = document.getElementById('chatPanel');
   const documentAssistant = document.getElementById('documentAssistant');
-  const voiceAssistant = document.getElementById('voiceAssistant');
   const pdfAutoFillPanel = document.getElementById('pdfAutoFillPanel');
    const draftingPanel = document.getElementById('draftingPanel');
 
   // Hide all panels initially
   if (chatPanel) chatPanel.style.display = 'none';
   if (documentAssistant) documentAssistant.style.display = 'none';
-  if (voiceAssistant) voiceAssistant.style.display = 'none';
   if (pdfAutoFillPanel) pdfAutoFillPanel.style.display = 'none';
   if (draftingPanel) draftingPanel.style.display = 'none';
 
@@ -5657,15 +5747,23 @@ function saveChats(chats){
   try { localStorage.setItem('chats', JSON.stringify(chats)); } catch(_) {}
 }
 function startNewChat(){
+  console.log('Starting new chat...'); // Debug log
   const chats = loadChats();
   const newChat = { id: Date.now().toString(), title: 'New chat', messages: [] };
   chats.unshift(newChat);
   saveChats(chats);
   setActiveChatId(newChat.id);
-  // reset UI thread
+  
+  // Reset main chat UI
   const container = document.getElementById('chatMessages');
-  if (container){ container.innerHTML = ''; ensureChatWelcome(); }
+  if (container){ 
+    container.innerHTML = ''; 
+    ensureChatWelcome(); 
+  }
+  
+  // Update both histories
   renderChatHistory();
+  renderModalChatHistory();
 }
 function appendMessageToHistory(role, content){
   const chats = loadChats();
@@ -5677,7 +5775,10 @@ function appendMessageToHistory(role, content){
     chat.title = content.slice(0, 28);
   }
   saveChats(chats);
+  
+  // Update both histories
   renderChatHistory();
+  renderModalChatHistory();
 }
 function openChat(id){
   setActiveChatId(id);
@@ -5698,31 +5799,26 @@ function openChat(id){
     div.innerHTML = m.role==='agent' ? m.content : m.content;
     container.appendChild(div);
   });
-  container.scrollTop = container.scrollHeight;
+
   }
   
+  // Update both histories
   renderChatHistory();
+  renderModalChatHistory();
 }
 function renderChatHistory(){
-  const list = document.getElementById('chatHistory');
-  if(!list) return;
-  const chats = loadChats();
-  const active = getActiveChatId();
-  list.innerHTML = chats.map(c=>
-    `<div class="history-item ${c.id===active?'active':''}" onclick="openChat('${c.id}')">
-      <span class="history-title">${(c.title||'New chat')}</span>
-      <span class="history-actions">
-        <i class="fa-solid fa-trash delete-btn" title="Delete" onclick="event.stopPropagation(); deleteChat('${c.id}')"></i>
-        <i class="fa-solid fa-chevron-right chev" style="color:#64748b"></i>
-      </span>
-    </div>`
-  ).join('');
+  // Main chat panel doesn't have a separate history section
+  // This function is kept for compatibility but doesn't render anything
+  // Chat history is only shown in the modal
+  return;
 }
 
 function deleteChat(id){
+  console.log('Deleting chat:', id); // Debug log
   const chats = loadChats();
   const next = chats.filter(c=>c.id!==id);
   saveChats(next);
+  
   if (getActiveChatId() === id){
     setActiveChatId(next[0]?.id || '');
     if (next.length){
@@ -5735,7 +5831,22 @@ function deleteChat(id){
       }
     }
   }
+  
+  // Update both main chat and modal chat history
   renderChatHistory();
+  renderModalChatHistory();
+  
+  // If we're in the modal, also update the modal chat display
+  const modalContainer = document.getElementById('modalChatMessages');
+  if (modalContainer && getActiveChatId()) {
+    const currentChat = next.find(c => c.id === getActiveChatId());
+    if (currentChat) {
+      openModalChat(currentChat.id);
+    } else {
+      modalContainer.innerHTML = '';
+      ensureModalChatWelcome();
+    }
+  }
 }
 
 
@@ -5753,35 +5864,17 @@ function showUploadUI() {
   document.getElementById('draftingPanel').style.display = 'none';
   document.getElementById('casePanel').style.display = 'none';
   document.getElementById('customerPanel').style.display = 'none';
-  const voicePanel = document.getElementById('voiceAssistant');
-  if (voicePanel) voicePanel.style.display = 'none';
+  // voiceAssistant panel removed - functionality moved to case form
 
   const pdfPanel = document.getElementById('pdfAutoFillPanel');
   if (pdfPanel) pdfPanel.style.display = 'none';
 }
 
-function openVoiceScreen() {
-  // Hide welcome screen
-  const welcomeScreen = document.getElementById('welcomeScreen');
-  if (welcomeScreen) {
-    welcomeScreen.style.display = 'none';
-  }
-  
-  document.getElementById('chatPanel').style.display = 'none';
-  document.getElementById('documentAssistant').style.display = 'none';
-  document.getElementById('voiceAssistant').style.display = 'flex';
-  document.getElementById('draftingPanel').style.display = 'none';
-  document.getElementById('pdfAutoFillPanel').style.display = 'none';
-  document.getElementById('casePanel').style.display = 'none';
-  document.getElementById('customerPanel').style.display = 'none';
-  const pdfPanel = document.getElementById('pdfAutoFillPanel');
-  if (pdfPanel) pdfPanel.style.display = 'none';
-}
+// openVoiceScreen function removed - audio functionality moved to case form
 
 function showPdfAutoFillPanel() {
   document.getElementById('chatPanel').style.display = 'none';
   document.getElementById('documentAssistant').style.display = 'none';
-  document.getElementById('voiceAssistant').style.display = 'none';
   const welcome = document.getElementById('welcomeScreen');
   if (welcome) welcome.style.display = 'none';
   document.getElementById('pdfAutoFillPanel').style.display = 'flex';
@@ -5793,7 +5886,6 @@ function showPdfAutoFillPanel() {
 function draftingPanel() {
   document.getElementById('chatPanel').style.display = 'none';
   document.getElementById('documentAssistant').style.display = 'none';
-  document.getElementById('voiceAssistant').style.display = 'none';
   const welcome = document.getElementById('welcomeScreen');
   if (welcome) welcome.style.display = 'none';
   document.getElementById('pdfAutoFillPanel').style.display = 'none';
@@ -5805,7 +5897,6 @@ function draftingPanel() {
 function openCasePanel() {
   document.getElementById('chatPanel').style.display = 'none';
   document.getElementById('documentAssistant').style.display = 'none';
-  document.getElementById('voiceAssistant').style.display = 'none';
   const welcome = document.getElementById('welcomeScreen');
   if (welcome) welcome.style.display = 'none';
   document.getElementById('pdfAutoFillPanel').style.display = 'none';
@@ -5818,7 +5909,6 @@ function openCasePanel() {
 function openCustomerPanel() {
   document.getElementById('chatPanel').style.display = 'none';
   document.getElementById('documentAssistant').style.display = 'none';
-  document.getElementById('voiceAssistant').style.display = 'none';
   const welcome = document.getElementById('welcomeScreen');
   if (welcome) welcome.style.display = 'none';
   document.getElementById('pdfAutoFillPanel').style.display = 'none';
@@ -5854,11 +5944,7 @@ const dropzoneDoc = document.getElementById('dropzoneDoc');
 const fileInputDoc = document.getElementById('fileInputDoc');
 const dropzoneCase = document.getElementById('dropzoneCase');
 const fileInputCase = document.getElementById('fileInputCase');
-// Voice screen elements
-const voiceDropzone = document.getElementById('voiceDropzone');
-const voiceFileInput = document.getElementById('voiceFileInput');
-const voicePreview = document.getElementById('voicePreview');
-const voiceSummaryBtn = document.getElementById('voiceSummaryBtn');
+// Voice screen elements removed - functionality moved to case form
 const preview = document.getElementById('preview');
 const submitBtn = document.getElementById('submitBtn');
 const downloadBtn = document.getElementById('downloadBtn');
@@ -5870,9 +5956,7 @@ function setPreviewContent(html) {
   preview.innerHTML = html;
 }
 
-function setVoicePreviewContent(html) {
-  if (voicePreview) voicePreview.innerHTML = html;
-}
+// setVoicePreviewContent function removed - functionality moved to case form
 
 function readFileAsText(file) {
   return new Promise((resolve, reject) => {
@@ -6029,63 +6113,7 @@ function wireDropzone(zoneEl, inputEl, kind) {
 
 wireDropzone(dropzoneDoc, fileInputDoc, 'doc');
 wireDropzone(dropzoneCase, fileInputCase, 'case');
-// Voice screen wiring
-function wireVoice(zone, input){
-  if(!zone || !input) return;
-  zone.addEventListener('click', ()=> input.click());
-  zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('drag'); });
-  zone.addEventListener('dragleave', ()=> zone.classList.remove('drag'));
-  zone.addEventListener('drop', e=>{ e.preventDefault(); zone.classList.remove('drag'); handleVoiceFiles(e.dataTransfer.files); });
-  input.addEventListener('change', e=> handleVoiceFiles(e.target.files));
-}
-wireVoice(voiceDropzone, voiceFileInput);
-
-function handleVoiceFiles(files){
-  if(!files || files.length===0) return;
-  uploadedAudioBlob = files[0];
-  setVoicePreviewContent(`<pre>${uploadedAudioBlob.name} (${(uploadedAudioBlob.size/1024).toFixed(1)} KB)\n\nReady to summarize.</pre>`);
-  if (voiceSummaryBtn) voiceSummaryBtn.classList.remove('hidden');
-}
-
-if (voiceSummaryBtn) {
-  voiceSummaryBtn.addEventListener('click', ()=>{
-    if(!uploadedAudioBlob) return;
-    voiceSummaryBtn.disabled = true;
-    voiceSummaryBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Summarizing...';
-    
-    const formData = new FormData();
-    formData.append("audio", uploadedAudioBlob);
-    
-    fetch("http://localhost:5050/upload-voice", {
-      method: "POST",
-      body: formData
-    })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.voice_id) {
-        // Fetch summary from DB
-        return fetch(`http://localhost:5050/voice-summary/${data.voice_id}`);
-      } else {
-        throw new Error(data.error || "Voice upload failed");
-      }
-    })
-    .then(res => res.json())
-    .then(data => {
-      const summary = data.summary || `Audio summary for: ${uploadedAudioBlob.name}\n\n❌ Summary generation failed.`;
-      const voiceSummaryText = document.getElementById('voiceSummaryText');
-      if (voiceSummaryText) voiceSummaryText.value = summary;
-    })
-    .catch((err) => {
-      const summary = `Audio summary for: ${uploadedAudioBlob.name}\n\n❌ ${err.message}`;
-      const voiceSummaryText = document.getElementById('voiceSummaryText');
-      if (voiceSummaryText) voiceSummaryText.value = summary;
-    })
-    .finally(() => {
-      voiceSummaryBtn.disabled = false;
-      voiceSummaryBtn.innerHTML = '<i class="fa-solid fa-align-left"></i> Generate Summary';
-    });
-  });
-}
+// Voice screen wiring removed - functionality moved to case form
 
 function updateSubmitVisibility() {
   if (!submitBtn) return;
@@ -6295,141 +6323,7 @@ function toggleDropdown() {
   menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
-// ✅ Handle voice file upload
-function uploadVoiceFile() {
-  const input = document.getElementById("voiceUpload");
-  const file = input.files[0];
-  if (!file) return;
-
-  const formData = new FormData();
-  formData.append("audio", file);
-
-  addMessage("📄 Summary will be generated...", "agent");
-
-  fetch("http://localhost:5050/upload-voice", {
-    method: "POST",
-    body: formData
-  })
-  .then((res) => res.json())
-  .then((data) => {
-    if (data.voice_id) {
-      // Now fetch summary from DB
-      getVoiceSummaryFromDB(data.voice_id);
-    } else {
-      addMessage("❌ Voice upload failed: " + (data.error || "Unknown error"), "agent");
-    }
-  })
-  .catch((err) => {
-    addMessage("❌ Voice upload failed.", "agent");
-    console.error(err);
-  });
-
-  input.value = "";
-}
-
-function getVoiceSummaryFromDB(voiceId) {
-  fetch(`http://localhost:5050/voice-summary/${voiceId}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.summary) {
-        addMessage(`📄 Summary: ${data.summary}`, "agent");
-      } else {
-        addMessage("❌ Summary generation failed: " + (data.error || "Unknown error"), "agent");
-      }
-    })
-    .catch(() => {
-      addMessage("❌ Failed to fetch summary from DB.", "agent");
-    });
-}
-
-
-// ...existing code...
-if (voiceSummaryBtn) {
-  voiceSummaryBtn.addEventListener('click', ()=>{
-    if(!uploadedAudioBlob) return;
-    voiceSummaryBtn.disabled = true;
-    voiceSummaryBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Summarizing...';
-    
-    const formData = new FormData();
-    formData.append("audio", uploadedAudioBlob);
-    
-    fetch("http://localhost:5050/upload-voice", {
-      method: "POST",
-      body: formData
-    })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.voice_id) {
-        // Fetch summary from DB
-        return fetch(`http://localhost:5050/voice-summary/${data.voice_id}`);
-      } else {
-        throw new Error(data.error || "Voice upload failed");
-      }
-    })
-    .then(res => res.json())
-    .then(data => {
-      const summary = data.summary || `Audio summary for: ${uploadedAudioBlob.name}\n\n❌ Summary generation failed.`;
-      const voiceSummaryText = document.getElementById('voiceSummaryText');
-      if (voiceSummaryText) voiceSummaryText.value = summary;
-    })
-    .catch((err) => {
-      const summary = `Audio summary for: ${uploadedAudioBlob.name}\n\n❌ ${err.message}`;
-      const voiceSummaryText = document.getElementById('voiceSummaryText');
-      if (voiceSummaryText) voiceSummaryText.value = summary;
-    })
-    .finally(() => {
-      voiceSummaryBtn.disabled = false;
-      voiceSummaryBtn.innerHTML = '<i class="fa-solid fa-align-left"></i> Generate Summary';
-    });
-  });
-}
-
-// Download logic for audio summary
-const voiceDownloadBtn = document.getElementById('voiceDownloadBtn');
-const voiceFormatSelect = document.getElementById('voiceFormatSelect');
-if (voiceDownloadBtn) {
-  voiceDownloadBtn.addEventListener('click', () => {
-    const summary = document.getElementById('voiceSummaryText')?.value || '';
-    if (!summary) return;
-    const format = voiceFormatSelect?.value || 'txt';
-    const filenameBase = uploadedAudioBlob?.name?.replace(/\.[^/.]+$/, '') || 'audio';
-    const filename = `${filenameBase}-summary.${format}`;
-
-    if (format === 'txt') {
-      const blob = new Blob([summary], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } else {
-      // For pdf/docx, request backend conversion
-      fetch("http://localhost:5050/download-voice-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ summary, format })
-      })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("❌ Download failed.");
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((err) => {
-        alert("❌ Error downloading file.");
-      });
-    }
-  });
-}
+// Old voice upload functions removed - functionality moved to case form
 
 
 // For PDF Auto Fill Form
@@ -6688,7 +6582,7 @@ function showAnalysisPanel(analysisText) {
       left: 0 !important;
       width: 100% !important;
       height: 100% !important;
-      background: rgba(0, 0, 0, 0.5) !important;
+      background: rgba(0, 0, 0, 0.3) !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -6930,7 +6824,7 @@ async function analyzeCaseDocument() {
           left: 0 !important;
           width: 100% !important;
           height: 100% !important;
-          background: rgba(0, 0, 0, 0.5) !important;
+          background: rgba(0, 0, 0, 0.3) !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
@@ -7056,7 +6950,7 @@ async function testModal() {
           left: 0 !important;
           width: 100% !important;
           height: 100% !important;
-          background: rgba(0, 0, 0, 0.5) !important;
+          background: rgba(0, 0, 0, 0.3) !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
@@ -7171,6 +7065,169 @@ async function handleCaseFileSelection() {
   }
   // Re-enable analyze button if it exists
   if (analyzeBtn) analyzeBtn.disabled = !combinedContent;
+}
+
+// Audio file handling for case form
+async function handleCaseAudioSelection() {
+  const fileInput = document.getElementById('caseAudioFile');
+  const processBtn = document.getElementById('processAudioBtn');
+  const analysisSection = document.getElementById('audioAnalysisSection');
+  
+  if (!fileInput || !fileInput.files.length) return;
+  
+  console.log('Handling case audio selection...');
+  const audioFile = fileInput.files[0];
+  
+  // Show selected file name
+  const nameEl = document.getElementById('caseAudioSelectedName');
+  if (nameEl) {
+    nameEl.textContent = 'Selected: ' + audioFile.name;
+  }
+  
+  // Show process button
+  if (processBtn) {
+    processBtn.style.display = 'inline-block';
+    processBtn.disabled = false;
+  }
+  
+  // Hide analysis section until processing
+  if (analysisSection) {
+    analysisSection.style.display = 'none';
+  }
+}
+
+async function processCaseAudio() {
+  const fileInput = document.getElementById('caseAudioFile');
+  const analysisSection = document.getElementById('audioAnalysisSection');
+  const audioActions = document.getElementById('audioActions');
+  const processBtn = document.getElementById('processAudioBtn');
+  
+  if (!fileInput || !fileInput.files.length) {
+    alert('Please select an audio file first.');
+    return;
+  }
+  
+  const audioFile = fileInput.files[0];
+  console.log('Processing audio file:', audioFile.name);
+  
+  // Disable process button and show loading
+  if (processBtn) {
+    processBtn.disabled = true;
+    processBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+  }
+  
+  // Show analysis section
+  if (analysisSection) {
+    analysisSection.style.display = 'block';
+  }
+  
+  // Show loading state in all analysis sections
+  const summaryEl = document.getElementById('audioAnalysisSummary');
+  const missingEl = document.getElementById('audioAnalysisMissingClauses');
+  const riskyEl = document.getElementById('audioAnalysisRiskyLanguage');
+  const suggestionsEl = document.getElementById('audioAnalysisSuggestions');
+  
+  if (summaryEl) summaryEl.textContent = '⏳ Processing audio file...';
+  if (missingEl) missingEl.textContent = '⏳ Analyzing missing clauses...';
+  if (riskyEl) riskyEl.textContent = '⏳ Checking for risky language...';
+  if (suggestionsEl) suggestionsEl.textContent = '⏳ Generating suggestions...';
+  
+  // Create FormData for audio processing
+  const formData = new FormData();
+  formData.append('audio', audioFile);
+  
+  try {
+    const response = await fetch('/process-audio', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    console.log('Audio processing response:', data);
+    
+    if (data.success && data.summary) {
+      // Parse the analysis text to extract different sections
+      const sections = parseAnalysisText(data.summary);
+      
+      // Update each section
+      if (summaryEl) summaryEl.textContent = sections.summary || 'No summary available';
+      if (missingEl) missingEl.textContent = sections.missingClauses || 'No missing clauses identified';
+      if (riskyEl) riskyEl.textContent = sections.riskyLanguage || 'No risky language detected';
+      if (suggestionsEl) suggestionsEl.textContent = sections.suggestions || 'No suggestions available';
+      
+      // Show download actions
+      if (audioActions) {
+        audioActions.style.display = 'flex';
+      }
+    } else {
+      const errorMessage = '❌ Error processing audio file.\n\nPlease try:\n• Ensure the audio file is not corrupted\n• Check that the file format is supported (.mp3, .wav, .m4a, .ogg)\n• Try a different audio file';
+      if (summaryEl) summaryEl.textContent = errorMessage;
+      if (missingEl) missingEl.textContent = 'Error occurred during analysis';
+      if (riskyEl) riskyEl.textContent = 'Error occurred during analysis';
+      if (suggestionsEl) suggestionsEl.textContent = 'Error occurred during analysis';
+    }
+  } catch (error) {
+    console.error('Error processing audio file:', error);
+    const errorMessage = '❌ Server error while processing audio file.\n\nPlease try again or contact support if the issue persists.';
+    if (summaryEl) summaryEl.textContent = errorMessage;
+    if (missingEl) missingEl.textContent = 'Server error occurred';
+    if (riskyEl) riskyEl.textContent = 'Server error occurred';
+    if (suggestionsEl) suggestionsEl.textContent = 'Server error occurred';
+  }
+  
+  // Re-enable process button
+  if (processBtn) {
+    processBtn.disabled = false;
+    processBtn.innerHTML = '<i class="fa-solid fa-microphone"></i> Process Audio';
+  }
+}
+
+// Audio download functionality
+function downloadAudioAnalysis() {
+  const summaryEl = document.getElementById('audioAnalysisSummary');
+  const missingEl = document.getElementById('audioAnalysisMissingClauses');
+  const riskyEl = document.getElementById('audioAnalysisRiskyLanguage');
+  const suggestionsEl = document.getElementById('audioAnalysisSuggestions');
+  const formatSelect = document.getElementById('audioFormatSelect');
+  
+  if (!summaryEl || !formatSelect) {
+    alert('No analysis available to download.');
+    return;
+  }
+  
+  const format = formatSelect.value;
+  const filename = `audio_analysis.${format}`;
+  
+  // Combine all analysis sections
+  const analysisContent = `AUDIO ANALYSIS REPORT
+========================
+
+1. SUMMARY:
+${summaryEl.textContent || 'No summary available'}
+
+2. MISSING CLAUSES:
+${missingEl.textContent || 'No missing clauses identified'}
+
+3. RISKY LANGUAGE:
+${riskyEl.textContent || 'No risky language detected'}
+
+4. SUGGESTIONS:
+${suggestionsEl.textContent || 'No suggestions available'}
+
+---
+Generated on: ${new Date().toLocaleString()}
+`;
+  
+  // Create download link
+  const blob = new Blob([analysisContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function parseAnalysisText(text) {
@@ -8098,6 +8155,9 @@ function openChatModal() {
   const modal = document.getElementById('chatModal');
   modal.classList.remove('hidden');
   
+  // Prevent body scrolling when modal is open
+  document.body.classList.add('chat-modal-open');
+  
   // Clear any existing messages and show welcome
   const container = document.getElementById('modalChatMessages');
   if (container) {
@@ -8111,9 +8171,13 @@ function openChatModal() {
 function closeChatModal() {
   const modal = document.getElementById('chatModal');
   modal.classList.add('hidden');
+  
+  // Restore body scrolling when modal is closed
+  document.body.classList.remove('chat-modal-open');
 }
 
 function startNewChatInModal() {
+  console.log('Starting new chat in modal...'); // Debug log
   const chats = loadChats();
   const newChat = { id: Date.now().toString(), title: 'New chat', messages: [] };
   chats.unshift(newChat);
@@ -8126,7 +8190,15 @@ function startNewChatInModal() {
     container.innerHTML = '';
     ensureModalChatWelcome();
   }
+  
+  // Update both histories
+  renderChatHistory();
   renderModalChatHistory();
+  
+  // Hide history panel and show messages
+  const historyPanel = document.getElementById('chatHistoryPanel');
+  if (historyPanel) historyPanel.classList.add('hidden');
+  container.style.display = 'block';
 }
 
 function toggleChatHistory() {
@@ -8158,8 +8230,7 @@ function ensureModalChatWelcome() {
     welcome.id = 'modalChatWelcome';
     welcome.className = 'chat-welcome';
     welcome.innerHTML = `<div>
-      <h3 style="margin:0 0 6px 0; color:#111;">Hello Akif</h3>
-      <div>Welcome to the chat. Ask anything and I will help you.</div>
+      <h3 style="margin:0 0 6px 0; color:#111;">Hi! how can i help you today?</h3>
     </div>`;
     container.appendChild(welcome);
   }
@@ -8170,7 +8241,11 @@ function renderModalChatHistory() {
   if (!list) return;
   const chats = loadChats();
   const active = getActiveChatId();
-  list.innerHTML = chats.map(c =>
+  
+  // Filter out empty chats and only show chats with actual content
+  const userChats = chats.filter(c => c.messages && c.messages.length > 0);
+  
+  list.innerHTML = userChats.map(c =>
     `<div class="history-item ${c.id === active ? 'active' : ''}" onclick="openModalChat('${c.id}')">
       <span class="history-title">${(c.title || 'New chat')}</span>
       <span class="history-actions">
@@ -8201,7 +8276,7 @@ function openModalChat(id) {
       div.innerHTML = m.role === 'agent' ? m.content : m.content;
       container.appendChild(div);
     });
-    container.scrollTop = container.scrollHeight;
+  
   }
   
   renderModalChatHistory();
@@ -8229,7 +8304,10 @@ function sendModalMessage() {
     msg.textContent = text;
     container.appendChild(msg);
     input.value = '';
-    container.scrollTop = container.scrollHeight;
+  
+
+    // Show thinking animation
+    const thinkingEl = showThinkingAnimation(container);
 
     // Get document preview for context
     const previewText = document.getElementById('docPreviewText')?.value || 
@@ -8247,6 +8325,9 @@ function sendModalMessage() {
     })
     .then(res => res.json())
     .then(data => {
+      // Hide thinking animation
+      hideThinkingAnimation(thinkingEl);
+      
       const agentMsg = document.createElement('div');
       agentMsg.classList.add('message', 'agent');
       
@@ -8262,17 +8343,20 @@ function sendModalMessage() {
       
       agentMsg.innerHTML = formatAgentAnswer(responseText);
       container.appendChild(agentMsg);
-      container.scrollTop = container.scrollHeight;
+    
       // Persist both messages in history
       appendMessageToHistory('user', text);
       appendMessageToHistory('agent', agentMsg.innerHTML);
     })
     .catch(() => {
+      // Hide thinking animation
+      hideThinkingAnimation(thinkingEl);
+      
       const agentMsg = document.createElement('div');
       agentMsg.classList.add('message', 'agent');
       agentMsg.innerHTML = formatAgentAnswer("Server error. Try again.");
       container.appendChild(agentMsg);
-      container.scrollTop = container.scrollHeight;
+    
       appendMessageToHistory('user', text);
       appendMessageToHistory('agent', agentMsg.innerHTML);
     });
@@ -8303,6 +8387,10 @@ function startVoiceToModal() {
     const voiceText = event.results[0][0].transcript;
     addModalMessage("🎤 " + voiceText, "user");
 
+    // Show thinking animation
+    const container = document.getElementById('modalChatMessages');
+    const thinkingEl = showThinkingAnimation(container);
+
     // Get document preview for context
     const previewText = document.getElementById('docPreviewText')?.value || 
                        window.documentText || 
@@ -8318,6 +8406,9 @@ function startVoiceToModal() {
     })
     .then(res => res.json())
     .then(data => {
+      // Hide thinking animation
+      hideThinkingAnimation(thinkingEl);
+      
       let responseText = "";
       if (data.answer) {
         responseText = data.answer;
@@ -8329,6 +8420,8 @@ function startVoiceToModal() {
       addModalMessage(responseText, "agent");
     })
     .catch(() => {
+      // Hide thinking animation
+      hideThinkingAnimation(thinkingEl);
       addModalMessage("❌ Voice question failed. Please try again.", "agent");
     });
   };
@@ -8348,7 +8441,7 @@ function addModalMessage(text, role, options = {}) {
   div.className = `message ${role === 'user' ? 'user' : (role === 'agent' ? 'agent' : 'system')}`;
   div.innerHTML = role === 'agent' ? formatAgentAnswer(text) : text;
   container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+
   
   if (!skipHistory && (role === 'agent' || role === 'user')) {
     appendMessageToHistory(role, div.innerHTML);
@@ -8370,7 +8463,32 @@ try {
   showLogin();
 }
 
-
+// Initialize chat functionality when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Initializing chat functionality...'); // Debug log
+  
+  // Initialize chat histories
+  renderChatHistory();
+  renderModalChatHistory();
+  
+  // Ensure there's always an active chat
+  const activeId = getActiveChatId();
+  if (!activeId) {
+    startNewChat();
+  }
+  
+  // Add click event listeners for delete buttons (fallback)
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('delete-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      const chatId = e.target.getAttribute('onclick')?.match(/deleteChat\('([^']+)'\)/)?.[1];
+      if (chatId) {
+        deleteChat(chatId);
+      }
+    }
+  });
+});
 
 </script>
 </html>

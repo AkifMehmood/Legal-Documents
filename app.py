@@ -2408,6 +2408,72 @@ Document Content:
         return jsonify({"error": f"Failed to process voice question: {str(e)}"}), 500
 
 
+# Process audio file for case analysis
+@app.route("/process-audio", methods=["POST"])
+def process_audio():
+    try:
+        if "audio" not in request.files:
+            print("❌ No audio in request.files")
+            return jsonify({"success": False, "error": "No audio file in request"}), 400
+
+        file = request.files["audio"]
+        if file.filename == "":
+            print("❌ Empty filename")
+            return jsonify({"success": False, "error": "No selected file"}), 400
+
+        # Read audio content
+        content = file.read()
+        filename = file.filename
+        print(f"✅ Received audio file: {filename}, size: {len(content)} bytes")
+
+        # Save original audio to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_input:
+            temp_input.write(content)
+            temp_input.flush()
+            input_path = temp_input.name
+
+        # Convert to WAV (mono, 16-bit, 16000Hz) for better speech recognition
+        sound = AudioSegment.from_file(input_path)
+        sound = sound.set_channels(1)
+        sound = sound.set_frame_rate(16000)
+
+        # Create a temp WAV output file path
+        temp_output = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+        output_path = temp_output.name
+        temp_output.close()  # Close so it's not locked
+
+        sound.export(output_path, format="wav")
+
+        # Transcribe the audio using speech_recognition
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(output_path) as source:
+            audio_data = recognizer.record(source)
+            try:
+                text = recognizer.recognize_google(audio_data)
+                print("✅ Transcription:", text)
+            except sr.UnknownValueError:
+                return jsonify({"success": False, "error": "Google Speech Recognition could not understand the audio."}), 400
+            except sr.RequestError as e:
+                return jsonify({"success": False, "error": f"Google Speech API error: {str(e)}"}), 500
+
+        # Clean up temporary files
+        os.remove(input_path)
+        os.remove(output_path)
+
+        # Generate comprehensive analysis from transcribed text using the document analysis function
+        if text and text.strip():
+            print("📄 Generating analysis for transcribed text...")
+            summary = analyze_document(text)
+            print("✅ Analysis generated successfully")
+            return jsonify({"success": True, "summary": summary})
+        else:
+            return jsonify({"success": False, "error": "No text was transcribed from the audio."}), 400
+
+    except Exception as e:
+        print(f"❌ Exception during audio processing: {str(e)}")
+        return jsonify({"success": False, "error": f"Audio processing failed: {str(e)}"}), 500
+
+
 # ✅ Tell pytesseract where Tesseract is installed
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
@@ -3895,5 +3961,6 @@ if __name__ == "__main__":
     Timer(1, lambda: webbrowser.open("http://127.0.0.1:5050")).start()
     app.run(debug=True, port=5050)
 
+   
 
 

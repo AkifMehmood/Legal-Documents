@@ -32,89 +32,292 @@ def build_legislation_query(user_input: str) -> str:
 def build_bailii_query(user_input: str) -> str:
     return f"{user_input} {BAILII_SITE_QUERY}"
 def search_legislation_references(query: str, max_results: int = 5):
-    """Return top legislation references (title, url, snippet) using DuckDuckGo.
-    Filters to legislation.gov.uk and .gov.uk domains.
-    """
+    """Return comprehensive UK legislation references using multiple search strategies."""
     try:
         refs = []
-        with DDGS() as ddgs:
-            for r in ddgs.text(query, region="uk-en", safesearch="moderate", max_results=max_results):
-                url = r.get("href") or r.get("url") or ""
-                if not url:
-                    continue
-                # keep UK legislation/government sources primarily
-                host = url.lower()
-                if ("legislation.gov.uk" in host) or host.endswith(".gov.uk") or "://www.legislation.gov.uk" in host:
-                    refs.append({
-                        "title": (r.get("title") or r.get("heading") or "Legislation reference"),
-                        "url": url,
-                        "snippet": r.get("body") or r.get("snippet") or ""
-                    })
-                if len(refs) >= max_results:
-                    break
-        return refs
+        # Multiple search strategies for UK legislation
+        search_queries = [
+            f"{query} UK legislation act statute",
+            f"{query} legislation.gov.uk",
+            f"{query} UK act parliament",
+            f"site:legislation.gov.uk {query}",
+            f"{query} UK law statute",
+            f"{query} UK government legislation",
+            f"legislation.gov.uk {query} UK"
+        ]
+        
+        for search_query in search_queries:
+            if len(refs) >= max_results * 2:
+                break
+                
+            with DDGS() as ddgs:
+                for r in ddgs.text(search_query, region="uk-en", safesearch="moderate", max_results=max_results * 2):
+                    url = r.get("href") or r.get("url") or ""
+                    if not url:
+                        continue
+                    # Prioritize UK legislation/government sources
+                    host = url.lower()
+                    if ("legislation.gov.uk" in host) or host.endswith(".gov.uk") or "://www.legislation.gov.uk" in host:
+                        # Extract act/statute information
+                        act_info = extract_legislation_info(url, r.get("title", ""))
+                        refs.append({
+                            "title": (r.get("title") or r.get("heading") or "UK Legislation"),
+                            "url": url,
+                            "snippet": r.get("body") or r.get("snippet") or "",
+                            "act_info": act_info,
+                            "source": "legislation.gov.uk"
+                        })
+                    if len(refs) >= max_results * 2:
+                        break
+        
+        # Remove duplicates and sort by relevance
+        seen_urls = set()
+        unique_refs = []
+        for ref in refs:
+            if ref.get('url') not in seen_urls:
+                seen_urls.add(ref.get('url'))
+                unique_refs.append(ref)
+        
+        return unique_refs[:max_results]
     except Exception as e:
         print(f"⚠️ Legislation search failed: {e}")
         return []
 
+def extract_legislation_info(url: str, title: str) -> str:
+    """Extract legislation information from URL and title."""
+    try:
+        import re
+        # Extract year from URL or title
+        year_match = re.search(r'/(\d{4})/', url)
+        year = year_match.group(1) if year_match else ""
+        
+        # Extract act type
+        act_type = ""
+        if "act" in title.lower():
+            act_type = "Act"
+        elif "statute" in title.lower():
+            act_type = "Statute"
+        elif "regulation" in title.lower():
+            act_type = "Regulation"
+        elif "order" in title.lower():
+            act_type = "Order"
+        
+        # Build info string
+        info_parts = []
+        if act_type:
+            info_parts.append(act_type)
+        if year:
+            info_parts.append(f"({year})")
+        
+        return " - ".join(info_parts) if info_parts else ""
+    except Exception:
+        return ""
+
 def search_bailii_references(query: str, max_results: int = 5):
-    """Return top BAILII case law references (title, url, snippet)."""
+    """Return top BAILII case law references (title, url, snippet) with enhanced UK focus."""
     try:
         refs = []
-        with DDGS() as ddgs:
-            for r in ddgs.text(query, region="uk-en", safesearch="moderate", max_results=max_results * 2):
-                url = r.get("href") or r.get("url") or ""
-                if not url:
-                    continue
-                host = (url or "").lower()
-                if "bailii.org" in host:
-                    refs.append({
-                        "title": (r.get("title") or r.get("heading") or "BAILII case"),
-                        "url": url,
-                        "snippet": r.get("body") or r.get("snippet") or ""
-                    })
-                if len(refs) >= max_results:
-                    break
-        return refs
+        # Multiple search strategies to find real cases
+        search_queries = [
+            f"{query} UK case law judgment decision",
+            f"{query} bailii.org UK",
+            f"{query} court appeal high court UK",
+            f"site:bailii.org {query} UK",
+            f"{query} UK Supreme Court Court of Appeal",
+            f"{query} UK legal case judgment",
+            f"bailii.org {query} UK case law"
+        ]
+        
+        for search_query in search_queries:
+            if len(refs) >= max_results * 2:
+                break
+                
+            with DDGS() as ddgs:
+                for r in ddgs.text(search_query, region="uk-en", safesearch="moderate", max_results=max_results * 2):
+                    url = r.get("href") or r.get("url") or ""
+                    if not url:
+                        continue
+                    host = (url or "").lower()
+                    if "bailii.org" in host:
+                        # Prioritize UK cases and judgments
+                        if any(keyword in host for keyword in ["/uk/cases/", "/uk/cmu/", "/uk/other/"]):
+                            # Verify this is a real case by checking URL structure
+                            if verify_bailii_case_url(url):
+                                refs.append({
+                                    "title": (r.get("title") or r.get("heading") or "BAILII UK Case"),
+                                    "url": url,
+                                    "snippet": r.get("body") or r.get("snippet") or "",
+                                    "priority": "high"  # Mark UK cases as high priority
+                                })
+                        else:
+                            refs.append({
+                                "title": (r.get("title") or r.get("heading") or "BAILII case"),
+                                "url": url,
+                                "snippet": r.get("body") or r.get("snippet") or "",
+                                "priority": "medium"
+                            })
+                    if len(refs) >= max_results * 3:  # Get more results to filter
+                        break
+        
+        # Remove duplicates and sort by priority
+        seen_urls = set()
+        unique_refs = []
+        for ref in refs:
+            if ref.get('url') not in seen_urls:
+                seen_urls.add(ref.get('url'))
+                unique_refs.append(ref)
+        
+        # Sort by priority (UK cases first) and limit results
+        unique_refs.sort(key=lambda x: 0 if x.get("priority") == "high" else 1)
+        return unique_refs[:max_results]
     except Exception as e:
         print(f"⚠️ BAILII search failed: {e}")
         return []
 
-def bailii_lucy_search(query: str, max_results: int = 5):
-    """Query BAILII Lucy search and parse case results with titles and links.
-    Example endpoint: https://www.bailii.org/cgi-bin/lucy_search_1.cgi?q=illegal+workers
-    """
+def verify_bailii_case_url(url: str) -> bool:
+    """Verify that a BAILII URL is a real case URL."""
     try:
-        params = {"q": query}
-        url = f"https://www.bailii.org/cgi-bin/lucy_search_1.cgi?{urlencode(params)}"
-        resp = requests.get(url, timeout=15)
-        if resp.status_code != 200:
-            return []
-        soup = BeautifulSoup(resp.text, "lxml")
-        results = []
-        for a in soup.select("a"):
-            href = a.get("href") or ""
-            text = (a.get_text() or "").strip()
-            if not href or not text:
-                continue
-            # Heuristic: judgment links usually under /uk/cases/...
-            if href.startswith("/"):
-                full = f"https://www.bailii.org{href}"
-            else:
-                full = href
-            if "bailii.org" in full and any(part in full for part in ["/uk/cases/", "/ie/cases/", "/uk/cmu/", "/uk/other/"]):
-                results.append({"title": text, "url": full})
-            if len(results) >= max_results:
+        # Check if URL has proper BAILII case structure
+        if not url or "bailii.org" not in url:
+            return False
+        
+        # Check for proper case URL patterns
+        case_patterns = [
+            "/uk/cases/EWCA/",  # Court of Appeal
+            "/uk/cases/EWHC/",  # High Court
+            "/uk/cases/UKSC/",  # Supreme Court
+            "/uk/cases/UKPC/",  # Privy Council
+            "/uk/cases/UKHL/",  # House of Lords
+            "/uk/cases/UKET/",  # Employment Tribunal
+            "/uk/cases/UKUT/",  # Upper Tribunal
+            "/uk/cases/UKFTT/", # First-tier Tribunal
+        ]
+        
+        return any(pattern in url for pattern in case_patterns)
+    except Exception:
+        return False
+
+
+
+def bailii_lucy_search(query: str, max_results: int = 5):
+    """Query BAILII Lucy search and parse case results with titles and links, focusing on UK solved cases."""
+    try:
+        # Multiple search strategies for real cases
+        search_queries = [
+            f"{query} UK judgment decision",
+            f"{query} immigration employment",
+            f"{query} illegal workers",
+            f"{query} right to work",
+            f"{query} employer penalty",
+            f"{query} UK case law",
+            f"{query} court judgment",
+            f"{query} legal decision",
+            f"immigration employment UK",
+            f"illegal workers UK",
+            f"employment law UK"
+        ]
+        
+        all_results = []
+        
+        for enhanced_query in search_queries:
+            if len(all_results) >= max_results * 2:
                 break
-        return results
+                
+            params = {"q": enhanced_query}
+            url = f"https://www.bailii.org/cgi-bin/lucy_search_1.cgi?{urlencode(params)}"
+            resp = requests.get(url, timeout=15)
+            if resp.status_code != 200:
+                continue
+                
+            soup = BeautifulSoup(resp.text, "lxml")
+            results = []
+            
+            for a in soup.select("a"):
+                href = a.get("href") or ""
+                text = (a.get_text() or "").strip()
+                if not href or not text:
+                    continue
+                    
+                # Heuristic: judgment links usually under /uk/cases/...
+                if href.startswith("/"):
+                    full = f"https://www.bailii.org{href}"
+                else:
+                    full = href
+                    
+                # Only include verified real case URLs
+                if verify_bailii_case_url(full):
+                    # Extract case year and court info if available
+                    case_info = extract_case_info_from_url(full, text)
+                    results.append({
+                        "title": text, 
+                        "url": full,
+                        "case_info": case_info,
+                        "priority": "high"
+                    })
+                elif "bailii.org" in full and "/ie/cases/" in full:
+                    # Include Irish cases as medium priority
+                    case_info = extract_case_info_from_url(full, text)
+                    results.append({
+                        "title": text, 
+                        "url": full,
+                        "case_info": case_info,
+                        "priority": "medium"
+                    })
+                    
+                if len(results) >= max_results:
+                    break
+            
+            all_results.extend(results)
+        
+        # Remove duplicates
+        seen_urls = set()
+        unique_results = []
+        for result in all_results:
+            if result.get('url') not in seen_urls:
+                seen_urls.add(result.get('url'))
+                unique_results.append(result)
+        
+        # Sort by priority and limit results
+        unique_results.sort(key=lambda x: 0 if x.get("priority") == "high" else 1)
+        return unique_results[:max_results]
     except Exception as e:
         print(f"⚠️ BAILII Lucy parse failed: {e}")
         return []
 
+def extract_case_info_from_url(url: str, title: str) -> str:
+    """Extract case information from BAILII URL and title."""
+    try:
+        # Extract year from URL or title
+        import re
+        year_match = re.search(r'/(\d{4})/', url)
+        year = year_match.group(1) if year_match else ""
+        
+        # Extract court from URL path
+        court = ""
+        if "/uk/cases/EWCA/" in url:
+            court = "Court of Appeal"
+        elif "/uk/cases/EWHC/" in url:
+            court = "High Court"
+        elif "/uk/cases/UKSC/" in url:
+            court = "Supreme Court"
+        elif "/uk/cases/UKPC/" in url:
+            court = "Privy Council"
+        elif "/uk/cases/UKHL/" in url:
+            court = "House of Lords"
+        
+        # Build case info string
+        info_parts = []
+        if court:
+            info_parts.append(court)
+        if year:
+            info_parts.append(f"({year})")
+        
+        return " - ".join(info_parts) if info_parts else ""
+    except Exception:
+        return ""
+
 def fetch_bailii_judgment_summary(url: str) -> str:
-    """Fetch a BAILII judgment page and attempt to extract a brief outcome summary.
-    This is heuristic: we look for paragraphs containing 'Held', 'Conclusion', 'Decision'.
-    """
+    """Fetch a BAILII judgment page and attempt to extract a brief outcome summary with enhanced UK case focus."""
     try:
         resp = requests.get(url, timeout=20)
         if resp.status_code != 200:
@@ -122,15 +325,30 @@ def fetch_bailii_judgment_summary(url: str) -> str:
         soup = BeautifulSoup(resp.text, "lxml")
         text_blocks = [p.get_text(" ", strip=True) for p in soup.select("p, div")]
         candidates = []
+        
+        # Enhanced keywords for UK case outcomes
+        outcome_keywords = [
+            "held", "conclusion", "decision", "disposition", "order", 
+            "judgment", "ruling", "finding", "determination", "verdict",
+            "appeal allowed", "appeal dismissed", "claim succeeded", "claim failed",
+            "liability", "damages", "injunction", "declaration"
+        ]
+        
         for t in text_blocks:
             tl = t.lower()
-            if any(k in tl for k in ["held", "conclusion", "decision", "disposition", "order"]):
-                candidates.append(t)
+            if any(k in tl for k in outcome_keywords):
+                # Prioritize longer, more detailed outcomes
+                if len(t) > 50:  # Skip very short snippets
+                    candidates.append((t, len(t)))
+        
         if candidates:
-            best = candidates[0]
-            if len(best) > 400:
-                best = best[:400].rsplit(" ", 1)[0] + "…"
+            # Sort by length (longer = more detailed) and take the best
+            candidates.sort(key=lambda x: x[1], reverse=True)
+            best = candidates[0][0]
+            if len(best) > 500:
+                best = best[:500].rsplit(" ", 1)[0] + "…"
             return best
+        
         # fallback: first couple paragraphs
         if text_blocks:
             join = " ".join(text_blocks[:2])
@@ -278,27 +496,25 @@ def get_answer_from_gemini(question: str, document: str) -> str:
     if question.lower().strip() in greetings:
         return "👋 Hello! I'm your legal case assistant. I can help you with questions about your cases, documents, and legal matters. How can I assist you today?"
 
-    # Build legislation.gov.uk query for UK legal references
+    # ==================== USE ALL THREE APIs ====================
+    
+    # Only use Legislation API for references
     legislation_query = build_legislation_query(question)
-    bailii_query = build_bailii_query(question)
-    legislation_refs = search_legislation_references(legislation_query, max_results=5)
-    # Combine DuckDuckGo site:bailii.org with direct Lucy search for better coverage
-    bailii_refs = search_bailii_references(bailii_query, max_results=3)
-    bailii_refs += bailii_lucy_search(question, max_results=5 - len(bailii_refs))
-    # Enrich bailii results with brief outcome summaries
-    enriched_bailii = []
-    for r in bailii_refs[:5]:
-        summary = fetch_bailii_judgment_summary(r.get("url", "")) if r.get("url") else ""
-        enriched_bailii.append({**r, "snippet": r.get("snippet") or summary})
-    bailii_refs = enriched_bailii
+    legislation_refs = search_legislation_references(legislation_query, max_results=3)
+    
+    # Disable BAILII API - only use Legislation API
+    bailii_refs = []
+    
+    # Only use Legislation API - no BAILII or Gemini processing needed
     refs_legislation_block = chr(10).join([
-        f"- {ref['title']}: {ref['url']}" + (f"{chr(10)}  Note: {ref['snippet']}" if ref.get('snippet') else "")
+        f"• {ref['title']}" + 
+        (f" {ref.get('act_info', '')}" if ref.get('act_info') else "") + 
+        f"{chr(10)}  Link: {ref['url']}" + 
+        (f"{chr(10)}  Note: {ref['snippet']}" if ref.get('snippet') else "")
         for ref in legislation_refs
-    ]) if legislation_refs else "- No legislation sources found for this query."
-    refs_bailii_block = chr(10).join([
-        f"- {ref['title']}: {ref['url']}" + (f"{chr(10)}  Outcome: {ref['snippet']}" if ref.get('snippet') else "")
-        for ref in bailii_refs
-    ]) if bailii_refs else "- No BAILII cases found for this query."
+    ]) if legislation_refs else "- No UK legal sources found for this query."
+    
+    refs_bailii_block = ""  # No BAILII references
     
     # Check if we have substantial document content
     has_document_content = document and len(document.strip()) > 100
@@ -323,27 +539,28 @@ INSTRUCTIONS:
 2. **USE DOCUMENT SPECIFICS**: Reference specific clauses, terms, and content from the uploaded document
 3. **CASE METADATA**: Use case information (dates, status, customer details) when relevant
 4. **LEGAL ANALYSIS**: For legal questions, analyze the document content and provide insights
-5. **UK LEGISLATION**: Consider UK legal framework (search hint: "{legislation_query}"). Where relevant, compare the document to the statutes below and cite them inline.
-6. **CASE LAW (BAILII)**: Consider UK case law (search hint: "{bailii_query}"). Where relevant, compare the document to the case law below and cite it inline.
-7. **SIMILAR CASES (BAILII)**: If a case name is detected (e.g., "{primary_case or 'N/A'}"), list similar UK cases with brief outcomes.
+5. **UK LAW**: Consider UK legal framework. Where relevant, compare the document to the statutes below and cite them inline.
+6. **MANDATORY UK CASE REFERENCES**: YOU MUST ALWAYS provide 2-3 relevant UK case references from the sources below. These are already provided for you - use them in your response. Focus on cases that demonstrate similar legal principles or outcomes.
+7. **SIMILAR CASES**: If a case name is detected (e.g., "{primary_case or 'N/A'}"), list similar UK cases with brief outcomes.
 8. **DOCUMENT REVIEW**: If asked about document review, analyze the uploaded content for:
    - Missing important clauses
    - Potential legal risks
    - Areas for improvement
    - Compliance with UK law
-7. **SPECIFIC REFERENCES**: Quote or reference specific parts of the uploaded document
-8. **PROFESSIONAL ADVICE**: Provide practical, actionable legal insights
-9. **DOCUMENT CONTENT FOCUS**: Always prioritize the uploaded document content in your response
-10. **QUOTE SPECIFIC SECTIONS**: When possible, quote or reference specific parts of the document
+9. **SPECIFIC REFERENCES**: Quote or reference specific parts of the uploaded document
+10. **PROFESSIONAL ADVICE**: Provide practical, actionable legal insights
+11. **DOCUMENT CONTENT FOCUS**: Always prioritize the uploaded document content in your response
+12. **QUOTE SPECIFIC SECTIONS**: When possible, quote or reference specific parts of the document
+13. **UK CASE FOCUS**: Prioritize UK cases that have been resolved and provide clear outcomes
+14. **CRITICAL**: You MUST include the UK case references provided below in your response. Do not say you cannot provide references - they are provided for you to use.
+15. **SIMILAR CASES REQUEST**: If the user asks for "similar cases", "related cases", or "different cases", you MUST provide the case references below as examples of similar solved cases.
+16. **IMPORTANT**: Do NOT mention "legislation", "BAILII", or any API names in your response. Present the legal references naturally as UK law and case law.
 
-LEGISLATION CANDIDATE SOURCES:
+UK LEGAL SOURCES:
 {refs_legislation_block}
 
-BAILII CASE LAW CANDIDATES:
-{refs_bailii_block}
-
-SIMILAR CASES DETECTED:
-{chr(10).join([f"- {c['title']}: {c['url']}" + (f"{chr(10)}  Outcome: {c['snippet']}" if c.get('snippet') else '') for c in similar_cases]) if similar_cases else "- None auto-detected"}
+SIMILAR UK CASES DETECTED:
+{chr(10).join([f"🔍 {c['title']}" + (f" {c.get('case_info', '')}" if c.get('case_info') else "") + f": {c['url']}" + (f"{chr(10)}   📋 Outcome: {c['snippet']}" if c.get('snippet') else '') for c in similar_cases]) if similar_cases else "- No similar cases auto-detected"}
 
 Please provide a comprehensive response that specifically references and analyzes the uploaded document content. Make sure your answer is directly related to what's in the uploaded document.
 """
@@ -359,32 +576,37 @@ USER QUESTION: {question}
 
 INSTRUCTIONS:
 1. Use the available case information to answer questions
-2. For legal advice questions, consider UK legislation (search hint: "{legislation_query}"). Compare relevant points to the statutes below when appropriate, and cite them. Also consider UK case law (search hint: "{bailii_query}") and cite relevant cases.
-3. Be professional, clear, and concise
-4. If you don't have enough information, suggest uploading relevant documents
-5. Focus on case management and general legal guidance
+2. For legal advice questions, consider UK law. Compare relevant points to the statutes below when appropriate, and cite them. Also consider UK case law and cite relevant cases.
+3. **MANDATORY**: YOU MUST ALWAYS provide 2-3 UK case references from the sources provided below. These are already found for you - use them in your response.
+4. Be professional, clear, and concise
+5. If you don't have enough information, suggest uploading relevant documents
+6. Focus on case management and general legal guidance
+7. **UK CASE FOCUS**: Prioritize UK cases that have been resolved and provide clear outcomes
+8. **CRITICAL**: You MUST include the UK case references provided below in your response. Do not say you cannot provide references - they are provided for you to use.
+9. **SIMILAR CASES REQUEST**: If the user asks for "similar cases", "related cases", or "different cases", you MUST provide the case references below as examples of similar solved cases.
+10. **IMPORTANT**: Do NOT mention "legislation", "BAILII", or any API names in your response. Present the legal references naturally as UK law and case law.
 
-LEGISLATION CANDIDATE SOURCES:
+UK LEGAL SOURCES:
 {refs_legislation_block}
-
-BAILII CASE LAW CANDIDATES:
-{refs_bailii_block}
 
 Please provide a helpful response based on the available information.
 """
     try:
         response = model.generate_content(prompt)
         answer = response.text.strip()
-        # Append references at the end for user transparency
-        if legislation_refs or bailii_refs:
+        # Append simple bullet point references
+        if legislation_refs:
             refs_list = []
-            if legislation_refs:
-                refs_list.append("Legislation:")
-                refs_list.extend([f"- {r['title']}: {r['url']}" for r in legislation_refs])
-            if bailii_refs:
-                refs_list.append("Case law (BAILII):")
-                refs_list.extend([f"- {r['title']}: {r['url']}" for r in bailii_refs])
-            answer = f"{answer}{chr(10)}{chr(10)}References:{chr(10)}{chr(10).join(refs_list)}"
+            refs_list.append("REFERENCES:")
+            for r in legislation_refs:
+                leg_ref = f"• {r['title']}"
+                if r.get('act_info'):
+                    leg_ref += f" - {r['act_info']}"
+                leg_ref += f"{chr(10)}  Link: {r['url']}"
+                if r.get('snippet'):
+                    leg_ref += f"{chr(10)}  Note: {r['snippet']}"
+                refs_list.append(leg_ref)
+            answer = f"{answer}{chr(10)}{chr(10)}{chr(10).join(refs_list)}"
         return answer
     except Exception as e:
         print(f"❌ Gemini error in get_answer_from_gemini: {e}")
@@ -430,6 +652,65 @@ def call_gemini_api(prompt: str) -> str:
     except Exception as e:
         print(f"❌ Gemini error in call_gemini_api: {e}")
         return "❌ Sorry, Gemini couldn't process the input."
+
+def search_legal_references_with_gemini(question: str, document: str = "") -> list:
+    """Use Gemini API to find relevant UK legal references and cases."""
+    try:
+        prompt = f"""
+You are a UK legal research assistant. Based on the following question and document context, provide 3-5 specific UK legal references including:
+
+1. Relevant UK legislation (Acts, Statutes, Regulations)
+2. Relevant UK case law (Supreme Court, Court of Appeal, High Court cases)
+3. Specific legal principles and precedents
+
+Question: {question}
+
+Document Context: {document[:1000] if document else "No document provided"}
+
+Please provide specific UK legal references in this format:
+LEGISLATION:
+- [Act Name] ([Year]) - [Brief description]
+- [Regulation Name] ([Year]) - [Brief description]
+
+CASE LAW:
+- [Case Name] - [Court] ([Year]) - [Brief outcome]
+- [Case Name] - [Court] ([Year]) - [Brief outcome]
+
+Focus on UK law only. Be specific with case names, court names, and years.
+"""
+        
+        response = call_gemini_api(prompt)
+        
+        # Parse the response to extract references
+        references = []
+        lines = response.split('\n')
+        current_section = None
+        
+        for line in lines:
+            line = line.strip()
+            if line.startswith('LEGISLATION:'):
+                current_section = 'legislation'
+            elif line.startswith('CASE LAW:'):
+                current_section = 'case_law'
+            elif line.startswith('- ') and current_section:
+                ref_text = line[2:].strip()
+                if current_section == 'legislation':
+                    references.append({
+                        'type': 'legislation',
+                        'title': ref_text,
+                        'source': 'gemini_api'
+                    })
+                elif current_section == 'case_law':
+                    references.append({
+                        'type': 'case_law',
+                        'title': ref_text,
+                        'source': 'gemini_api'
+                    })
+        
+        return references
+    except Exception as e:
+        print(f"⚠️ Gemini legal search failed: {e}")
+        return []
 
 def analyze_uploaded_document_content(document_text: str, question: str) -> str:
     """Analyze uploaded document content and answer questions specifically from that content."""

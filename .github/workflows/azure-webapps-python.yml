@@ -9,7 +9,7 @@
 name: Build and deploy Python app to Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: legalAI-App  # App Service name
+  AZURE_WEBAPP_NAME: legalAI-App   # App Service name
   PYTHON_VERSION: '3.11'
 
 on:
@@ -36,8 +36,10 @@ jobs:
         with:
           name: python-app
           path: |
-            .
+            ./*
             !venv/
+            !.git/
+            !*.md
 
   deploy:
     runs-on: ubuntu-latest
@@ -49,10 +51,10 @@ jobs:
           name: python-app
           path: .
 
-      - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v2
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
-          startup-command: gunicorn --bind=0.0.0.0 --timeout 600 app:app
+

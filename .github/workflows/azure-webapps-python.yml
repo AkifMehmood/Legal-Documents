@@ -32,12 +32,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Deploy to Azure Web App
+      - name: Deploy to Azure Web App using ZipDeploy
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
-          clean: true   # ensure fresh deployment, avoids 409 conflict
+          clean: true
+          scm-do-build-during-deployment: true   # forces ZipDeploy
 
 

@@ -11,6 +11,7 @@ name: Build and deploy Python app to Azure Web App
 env:
   AZURE_WEBAPP_NAME: legalAI-App   # App Service name
   PYTHON_VERSION: '3.11'
+  AZURE_RESOURCE_GROUP: Legal_Assistant   # <-- update with your actual group
 
 on:
   push:
@@ -32,13 +33,29 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Deploy to Azure Web App using ZipDeploy
+      - name: Force ZipDeploy
+        run: echo "SCM_DO_BUILD_DURING_DEPLOYMENT=true" >> $GITHUB_ENV
+
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
           clean: true
-          scm-do-build-during-deployment: true   # forces ZipDeploy
+
+      # 🔹 Authenticate with Azure before setting startup command
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set startup command
+        run: |
+          az webapp config set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --startup-file "gunicorn --bind=0.0.0.0 --timeout 600 app:app"
+
 
 

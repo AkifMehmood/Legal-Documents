@@ -42,7 +42,7 @@ from fpdf import FPDF
 #from agent import model 
 from flask import send_from_directory
 import traceback
-from waitress import serve
+
 
 import re
 import urllib.request
@@ -320,7 +320,7 @@ def ensure_documents_table():
             cur.execute("""
                 CREATE TABLE Documents (
                     DocumentID SERIAL PRIMARY KEY,
-                    FileName VARCHAR(255) NOT NULL,
+                    FileName VARCHAR(255) NOT NULL, 
                     FileURL VARCHAR(500),
                     UploadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     -- Document Type (Customer or Case)

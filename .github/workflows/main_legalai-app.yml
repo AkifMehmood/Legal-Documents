@@ -37,6 +37,15 @@ jobs:
       - name: Wait before deployment
         run: sleep 20
 
+      - name: Restart Azure Web App (optional but recommended)
+        run: |
+          az webapp restart --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group <your-resource-group>
+        env:
+          AZURE_WEBAPP_NAME: ${{ env.AZURE_WEBAPP_NAME }}
+          AZURE_RESOURCE_GROUP: <Legal_Assistant>
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        shell: bash
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
@@ -44,5 +53,3 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
           clean: true
-
-

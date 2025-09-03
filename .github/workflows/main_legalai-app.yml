@@ -55,4 +55,5 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
-          startup-command: gunicorn --bind=0.0.0.0 --timeout 600 app:app
+          clean: true
+

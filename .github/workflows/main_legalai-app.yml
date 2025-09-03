@@ -39,8 +39,11 @@ jobs:
         with:
           name: python-app
           path: |
-            .
-            !venv/
+            *.py
+            requirements.txt
+            templates/
+            static/
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,4 +61,5 @@ jobs:
         with:
           app-name: 'legalAI-App'
           slot-name: 'Production'
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_932F7ADBEFD74AB6A9D00DF36F775250 }}

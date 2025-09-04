@@ -67,6 +67,11 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'LegalAssistant-App'
-        
+          slot-name: 'Production'
+          package: .
+
+      - name: Show deployed app URL
+        run: echo "✅ Your app is live at https://legalassistant-app.azurewebsites.net"
 
           
+

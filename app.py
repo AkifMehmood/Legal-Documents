@@ -44,9 +44,6 @@ from flask import send_from_directory
 import traceback
 
 
-from waitress import serve
-from app import app
-
 import re
 import urllib.request
 import urllib.error

@@ -77,7 +77,7 @@ CORS(app)
 # DB_CONFIG = {
 #     "host": "legalassistantserver.postgres.database.azure.com",
 #     "port": 5432,
-#     "dbname": "Document Drafting and Review Support Agent",  # Use the synced DB name
+#     "dbname": "Document_Drafting_and_Review_Support_Agent",  # Use the synced DB name
 #     "user": "postgres@legalassistantserver",
 #     "password": "Akif@Scaleable",
 #     "sslmode": "require"  # Required for Azure PostgreSQL
@@ -85,12 +85,18 @@ CORS(app)
 
 DB_CONFIG = {
     "host": os.environ.get("host"),
-    "port": os.environ.get("port"),
+    "port": int(os.environ.get("port", "5432")),
     "dbname": os.environ.get("dbname"),
     "user": os.environ.get("user"),
     "password": os.environ.get("password"),
-    "sslmode": os.environ.get("sslmode")
+    "sslmode": os.environ.get("sslmode", "require")
 }
+def get_connection():
+    if not all(DB_CONFIG.values()):
+        raise RuntimeError("Database configuration is incomplete. Check Azure App Settings.")
+    return psycopg2.connect(**DB_CONFIG)
+
+
 
 def get_connection():
     return psycopg2.connect(**DB_CONFIG)

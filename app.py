@@ -44,6 +44,9 @@ from flask import send_from_directory
 import traceback
 
 
+from waitress import serve
+from app import app
+
 import re
 import urllib.request
 import urllib.error
@@ -66,15 +69,31 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 CORS(app)
 
+# DB_CONFIG = {
+#     "host": "localhost",
+#     "port": 5432,
+#     "dbname": "Document Drafting and Review Support Agent",
+#     "user": "postgres",
+#     "password": "Akif@Scaleable"
+# }
+
+# DB_CONFIG = {
+#     "host": "legalassistantserver.postgres.database.azure.com",
+#     "port": 5432,
+#     "dbname": "Document Drafting and Review Support Agent",  # Use the synced DB name
+#     "user": "postgres@legalassistantserver",
+#     "password": "Akif@Scaleable",
+#     "sslmode": "require"  # Required for Azure PostgreSQL
+# }
+
 DB_CONFIG = {
-    "host": "localhost",
-    "port": 5432,
-    "dbname": "Document Drafting and Review Support Agent",
-    "user": "postgres",
-    "password": "Akif@Scaleable"
+    "host": os.environ.get("host"),
+    "port": os.environ.get("port"),
+    "dbname": os.environ.get("dbname"),
+    "user": os.environ.get("user"),
+    "password": os.environ.get("password"),
+    "sslmode": os.environ.get("sslmode")
 }
-
-
 
 def get_connection():
     return psycopg2.connect(**DB_CONFIG)
@@ -1476,224 +1495,6 @@ Admin Team
         print(f"❌ Failed to send status email to {user_email}: {e}")
 
 
-
-
-# document upload process
-# @app.route("/upload", methods=["POST"])
-# def upload():
-#     if 'files[]' not in request.files:
-#         return jsonify({"error": "No files provided"}), 400
-
-#     uploaded_files = request.files.getlist('files[]')
-#     if not uploaded_files:
-#         return jsonify({"error": "Empty file list"}), 400
-
-#     responses = []
-
-#     for file in uploaded_files:
-#         if file.filename == '':
-#             responses.append({"error": "Empty filename"})
-#             continue
-
-#         try:
-#             filename = file.filename
-#             ext = os.path.splitext(filename)[1].lower()
-#             filetype = ext[1:]  # remove dot
-#             file_bytes = file.read()
-
-#             # Extract text
-#             if ext == ".txt":
-#                 extracted_text = file_bytes.decode("utf-8")
-#             elif ext == ".docx":
-#                 doc = Document(BytesIO(file_bytes))
-#                 extracted_text = "\n".join([para.text for para in doc.paragraphs])
-#             elif ext == ".pdf":
-#                 pdf = fitz.open(stream=file_bytes, filetype="pdf")
-#                 extracted_text = "\n".join([page.get_text() for page in pdf])
-#             elif ext in [".jpg", ".jpeg", ".png"]:
-#                 image = Image.open(BytesIO(file_bytes))
-#                 extracted_text = pytesseract.image_to_string(image)
-#             else:
-#                 responses.append({"filename": filename, "error": "Unsupported file type."})
-#                 continue
-
-#             # Save to DB
-#             conn = get_connection()
-#             cur = conn.cursor()
-#             cur.execute("""
-#                 INSERT INTO documents (filename, filetype, content, extracted_text)
-#                 VALUES (%s, %s, %s, %s)
-#                 RETURNING id
-#             """, (filename, filetype, file_bytes, extracted_text))
-#             doc_id = cur.fetchone()[0]
-#             conn.commit()
-#             cur.close()
-#             conn.close()
-
-#             responses.append({
-#                 "filename": filename,
-#                 "id": doc_id,
-#                 "text": extracted_text
-#             })
-
-#         except Exception as e:
-#             responses.append({
-#                 "filename": file.filename,
-#                 "error": str(e)
-#             })
-
-#     return jsonify({"results": responses})
-
-
-
-# # document analysis
-# @app.route("/analyze", methods=["POST"])
-# def analyze():
-#     data = request.get_json()
-#     content = data.get("content")
-#     if not content:
-#         return jsonify({"error": "No content provided."}), 400
-
-#     try:
-#         analysis = analyze_document(content)  # Use your real logic
-#         return jsonify({"analysis": analysis})
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
-
-
-# class SafePDF(FPDF):
-#     def __init__(self):
-#         super().__init__()
-#         self.set_auto_page_break(auto=True, margin=15)
-
-# def sanitize_text(text):
-#     return text.replace('\r', '').strip()
-
-# def break_long_words(text, max_length=100):
-#     return ' '.join([
-#         word if len(word) <= max_length else word[:max_length] + '...'
-#         for word in text.split()
-#     ])
-
-# def generate_combined_pdf(original, analysis):
-#     pdf = SafePDF()
-#     pdf.add_page()
-#     page_width = pdf.w - 2 * pdf.l_margin
-
-#     def render_section(title, content):
-#         pdf.set_font("Helvetica", "B", 14)
-#         pdf.cell(0, 10, title, ln=True)
-#         pdf.set_font("Helvetica", "", 12)
-#         for line in content.strip().split('\n'):
-#             line = sanitize_text(line)
-#             line = break_long_words(line)
-#             pdf.multi_cell(page_width, 8, line)
-
-#     render_section("Original Document Content", original)
-#     pdf.add_page()
-#     render_section("AI Analysis", analysis)
-
-#     buffer = BytesIO()
-#     pdf.output(buffer)
-#     buffer.seek(0)
-#     return buffer, "report.pdf", "application/pdf"
-
-
-# @app.route("/download", methods=["POST"])
-# def download():
-#     data = request.get_json()
-#     original = data.get("original")
-#     analysis = data.get("analysis")
-#     format = data.get("format")
-
-#     if not all([original, analysis, format]):
-#         return jsonify({"error": "Missing data for download."}), 400
-
-#     if format == "txt":
-#         content = f"=== Original Document ===\n{original}\n\n=== AI Analysis ===\n{analysis}"
-#         buffer = BytesIO(content.encode("utf-8"))
-#         return send_file(buffer, as_attachment=True, download_name="report.txt", mimetype="text/plain")
-
-#     elif format == "docx":
-#         doc = Document()
-#         doc.add_heading("Original Document", level=1)
-#         for line in original.splitlines():
-#             doc.add_paragraph(line)
-#         doc.add_page_break()
-#         doc.add_heading("AI Analysis", level=1)
-#         for line in analysis.splitlines():
-#             doc.add_paragraph(line)
-#         buffer = BytesIO()
-#         doc.save(buffer)
-#         buffer.seek(0)
-#         return send_file(buffer, as_attachment=True, download_name="report.docx", mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-    
-#     elif format == "pdf":
-#         buffer, filename, mime = generate_combined_pdf(original, analysis)
-#         return send_file(buffer, as_attachment=True, download_name=filename, mimetype=mime)
-
-#     return jsonify({"error": "Unsupported file format."}), 400
-
-
-
-# from googletrans import Translator  # <-- add at the top if not already present
-# translator = Translator()  # <-- initialize once globally
-
-
-# # for chat
-# @app.route("/chat", methods=["POST"])
-# def chat():
-#     data = request.get_json()
-#     question = data.get("question", "")
-
-#     if not question:
-#         return jsonify({"answer": "❌ Missing question."}), 400
-
-#     try:
-#         # Step 1: Fetch context from both documents and cases tables
-#         conn = get_connection()
-#         cur = conn.cursor()
-#         cur.execute("SELECT extracted_text FROM documents WHERE extracted_text IS NOT NULL")
-#         doc_rows = cur.fetchall()
-#         # Cases: prefer description; fallback to any text column name you use
-#         try:
-#             cur.execute("SELECT description FROM cases WHERE description IS NOT NULL")
-#             case_rows = cur.fetchall()
-#         except Exception:
-#             case_rows = []
-#         cur.close(); conn.close()
-
-#         # Step 2: Combine into a single context
-#         parts = []
-#         if doc_rows:
-#             parts.append("\n\n".join([r[0] for r in doc_rows if r and r[0]]))
-#         if case_rows:
-#             parts.append("\n\n".join([r[0] for r in case_rows if r and r[0]]))
-#         combined_text = "\n\n".join([p for p in parts if p])
-
-#         if not combined_text.strip():
-#             return jsonify({"answer": "❌ No documents or cases found in database."}), 400
-
-#         # Step 3: Translate question to English
-#         detected = translator.detect(question)
-#         source_lang = detected.lang
-#         question_en = translator.translate(question, src=source_lang, dest='en').text
-
-#         # Step 4: Get AI answer
-#         answer_en = get_answer_from_gemini(question_en, combined_text)
-
-#         # Step 5: Translate answer back to user language
-#         final_answer = translator.translate(answer_en, src='en', dest=source_lang).text
-
-#         return jsonify({"answer": final_answer})
-
-#     except Exception as e:
-#         print("❌ Error during chat DB search:", e)
-#         return jsonify({"error": str(e)}), 500
-
-
-
 # ================== FILE UPLOAD ================== #
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -2631,9 +2432,6 @@ from pdfrw import PdfReader, PdfWriter, PdfDict
 import google.generativeai as genai
 import json
 from typing import List, Dict  # <-- ADD THIS LINE
-
-# --- App Initialization ---
-#app = Flask(__name__)
 
 UPLOAD_DIR = "uploads"
 FILLED_DIR = "filled_pdfs"
@@ -3959,9 +3757,10 @@ if __name__ == "__main__":
     ensure_documents_table()
     ensure_signup_tables()
     
-    Timer(1, lambda: webbrowser.open("http://127.0.0.1:5050")).start()
-    app.run(debug=True, port=5050)
+    # Timer(1, lambda: webbrowser.open("http://127.0.0.1:5050")).start()
+    # app.run(debug=True, port=5050)
 
-   
+    port = int(os.environ.get("PORT", 5000))  # Azure PORT set karega
+    app.run(host="0.0.0.0", port=port)
 
 

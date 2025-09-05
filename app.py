@@ -84,22 +84,17 @@ CORS(app)
 # }
 
 DB_CONFIG = {
-    "host": os.environ.get("host"),
-    "port": int(os.environ.get("port", "5432")),
-    "dbname": os.environ.get("dbname"),
-    "user": os.environ.get("user"),
-    "password": os.environ.get("password"),
-    "sslmode": os.environ.get("sslmode", "require")
+    "host": "legalassistantserver.postgres.database.azure.com",
+    "port": 5432,
+    "dbname": "Document_Drafting_and_Review_Support_Agent",
+    "user": "postgres@legalassistantserver",
+    "password": "Akif@Scaleable",
+    "sslmode": "require"
 }
-def get_connection():
-    if not all(DB_CONFIG.values()):
-        raise RuntimeError("Database configuration is incomplete. Check Azure App Settings.")
-    return psycopg2.connect(**DB_CONFIG)
 
 
 
-def get_connection():
-    return psycopg2.connect(**DB_CONFIG)
+
 
 def get_connection():
     return psycopg2.connect(**DB_CONFIG)
@@ -3760,10 +3755,10 @@ if __name__ == "__main__":
     ensure_documents_table()
     ensure_signup_tables()
     
-    # Timer(1, lambda: webbrowser.open("http://127.0.0.1:5050")).start()
-    # app.run(debug=True, port=5050)
+    Timer(1, lambda: webbrowser.open("http://127.0.0.1:5050")).start()
+    app.run(debug=True, port=5050)
 
-    port = int(os.environ.get("PORT", 5000))  # Azure PORT set karega
-    app.run(host="0.0.0.0", port=port)
+    # port = int(os.environ.get("PORT", 5000))  # Azure PORT set karega
+    # app.run(host="0.0.0.0", port=port)
 
 

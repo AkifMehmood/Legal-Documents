@@ -87,8 +87,8 @@ DB_CONFIG = {
     "host": "legalassistantserver.postgres.database.azure.com",
     "port": 5432,
     "dbname": "Document_Drafting_and_Review_Support_Agent",
-    "user": "postgres@legalassistantserver",
-    "password": "Akif@Scaleable",
+    "user": "postgres",
+    "password": "Akif@123",
     "sslmode": "require"
 }
 

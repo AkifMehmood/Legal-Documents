@@ -89,52 +89,40 @@ DB_CONFIG = {
     "host": "legalassistantserver.postgres.database.azure.com",
     "port": 5432,
     "dbname": "Document_Drafting_and_Review_Support_Agent",
-    "user": "postgres",
+    "user": "postgres@legalassistantserver",   # ✅ Correct username
     "password": "Akif@123",
     "sslmode": "require"
 }
 
-
 def get_connection(max_retries: int = 5, retry_delay_seconds: int = 2):
-    """Create and return a PostgreSQL connection.
-
-    Priority order:
-    1) Use single-string connection from env var `POSTGRESQL_CONNECTION` (Azure App Service Connection Strings)
-    2) Use discrete env vars: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, DB_SSLMODE
-    3) Fallback to in-file `DB_CONFIG`
-
-    Retries a few times before failing to handle transient startup/network issues.
-    """
+    """Create and return a PostgreSQL connection with retries."""
     last_error = None
 
     for attempt in range(1, max_retries + 1):
         try:
             # 1) Azure-style single connection string
-            #    Azure App Service exposes connection strings as
-            #    POSTGRESQLCONNSTR_<Name>. In our case: POSTGRESQLCONNSTR_POSTGRESQL_CONNECTION
-            conn_str = os.environ.get("POSTGRESQL_CONNECTION") or os.environ.get("POSTGRESQLCONNSTR_POSTGRESQL_CONNECTION")
+            conn_str = os.getenv("POSTGRESQL_CONNECTION") or os.getenv("POSTGRESQLCONNSTR_POSTGRESQL_CONNECTION")
             if conn_str:
                 return psycopg2.connect(conn_str)
 
-            # 2) Discrete env vars or fallback to DB_CONFIG
+            # 2) Discrete env vars or fallback
             config = {
                 "host": os.getenv("DB_HOST", DB_CONFIG["host"]),
                 "port": int(os.getenv("DB_PORT", DB_CONFIG["port"])),
                 "dbname": os.getenv("DB_NAME", DB_CONFIG["dbname"]),
-                "user": os.getenv("DB_USER", DB_CONFIG["user"] or "postgres@legalassistantserver"),
+                "user": os.getenv("DB_USER", DB_CONFIG["user"]),   # ✅ Safe
                 "password": os.getenv("DB_PASSWORD", DB_CONFIG["password"]),
-                "sslmode": os.getenv("DB_SSLMODE", DB_CONFIG.get("sslmode", "require")),
+                "sslmode": os.getenv("DB_SSLMODE", DB_CONFIG["sslmode"]),
             }
             return psycopg2.connect(**config)
 
         except Exception as exc:
             last_error = exc
+            print(f"⚠️ DB connection attempt {attempt} failed: {exc}")
             if attempt == max_retries:
-                print(f"❌ Database connection failed after {max_retries} attempts: {exc}")
+                print(f"❌ Database connection failed after {max_retries} attempts")
                 raise
-            # Transient failure: wait and retry
             time.sleep(retry_delay_seconds)
-
 
 
 

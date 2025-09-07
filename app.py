@@ -33,6 +33,7 @@ import psycopg2
 from datetime import date
 import smtplib
 from email.message import EmailMessage
+from flask_cors import CORS
 
 
 import uuid

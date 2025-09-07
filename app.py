@@ -57,6 +57,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 from dotenv import load_dotenv
+import time
 
 # Create uploads directory if it doesn't exist
 UPLOAD_FOLDER = 'uploads'
@@ -88,17 +89,54 @@ DB_CONFIG = {
     "host": "legalassistantserver.postgres.database.azure.com",
     "port": 5432,
     "dbname": "Document_Drafting_and_Review_Support_Agent",
-    "user": "postgres",
+    "user": "postgres@legalassistantserver",
     "password": "Akif@123",
     "sslmode": "require"
 }
 
 
+def get_connection(max_retries: int = 5, retry_delay_seconds: int = 2):
+    """Create and return a PostgreSQL connection.
+
+    Priority order:
+    1) Use single-string connection from env var `POSTGRESQL_CONNECTION` (Azure App Service Connection Strings)
+    2) Use discrete env vars: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, DB_SSLMODE
+    3) Fallback to in-file `DB_CONFIG`
+
+    Retries a few times before failing to handle transient startup/network issues.
+    """
+    last_error = None
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            # 1) Azure-style single connection string
+            conn_str = os.environ.get("POSTGRESQL_CONNECTION")
+            if conn_str:
+                return psycopg2.connect(conn_str)
+
+            # 2) Discrete env vars or fallback to DB_CONFIG
+            config = {
+                "host": os.getenv("DB_HOST", DB_CONFIG["host"]),
+                "port": int(os.getenv("DB_PORT", DB_CONFIG["port"])),
+                "dbname": os.getenv("DB_NAME", DB_CONFIG["dbname"]),
+                "user": os.getenv("DB_USER", DB_CONFIG["user"] or "postgres@legalassistantserver"),
+                "password": os.getenv("DB_PASSWORD", DB_CONFIG["password"]),
+                "sslmode": os.getenv("DB_SSLMODE", DB_CONFIG.get("sslmode", "require")),
+            }
+            return psycopg2.connect(**config)
+
+        except Exception as exc:
+            last_error = exc
+            if attempt == max_retries:
+                print(f"❌ Database connection failed after {max_retries} attempts: {exc}")
+                raise
+            # Transient failure: wait and retry
+            time.sleep(retry_delay_seconds)
 
 
 
-def get_connection():
-    return psycopg2.connect(**DB_CONFIG)
+
+
 def get_admin_email():
     """Get the first available admin email from the database"""
     try:

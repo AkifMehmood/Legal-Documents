@@ -3751,14 +3751,14 @@ def delete_document(document_id):
 
 if __name__ == "__main__":
     # Ensure all required tables exist
-    ensure_cases_customers_tables()
-    ensure_documents_table()
-    ensure_signup_tables()
+    # ensure_cases_customers_tables()
+    # ensure_documents_table()
+    # ensure_signup_tables()
     
-    Timer(1, lambda: webbrowser.open("http://127.0.0.1:5050")).start()
-    app.run(debug=True, port=5050)
+    # Timer(1, lambda: webbrowser.open("http://127.0.0.1:5050")).start()
+    # app.run(debug=True, port=5050)
 
-    # port = int(os.environ.get("PORT", 5000))  # Azure PORT set karega
-    # app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 5000))  # Azure PORT set karega
+    app.run(host="0.0.0.0", port=port)
 
 

@@ -6,6 +6,24 @@
 <title>Chat & Document UI</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+(function(){
+  try{
+    const origin = window.location.origin;
+    const originalFetch = window.fetch;
+    if (typeof originalFetch === 'function'){
+      window.fetch = function(input, init){
+        if (typeof input === 'string'){
+          input = input
+            .replace('http://localhost:5050', origin)
+            .replace('http://127.0.0.1:5050', origin);
+        }
+        return originalFetch(input, init);
+      };
+    }
+  }catch(e){ /* no-op */ }
+})();
+</script>
 
 <style>
 body {
@@ -5140,7 +5158,7 @@ function handleLogin(){
     return;
   }
 
-  fetch("http://localhost:5050/login", {
+  fetch("/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
@@ -5164,7 +5182,7 @@ function handleLogin(){
 function showAdminUsers(){
   const content = document.getElementById('adminContent');
   if (content) content.classList.remove('hidden');
-  fetch('http://localhost:5050/admin/users.json')
+  fetch('/admin/users.json')
     .then(res => res.json())
     .then(data => {
       const rows = (data.users||[]);
@@ -5192,7 +5210,7 @@ function showAdminUsers(){
 function showAdminRequests(){
   const content = document.getElementById('adminContent');
   if (content) content.classList.remove('hidden');
-  fetch('http://localhost:5050/admin/requests.json')
+  fetch('/admin/requests.json')
     .then(res => res.json())
     .then(data => {
       const raw = (data.requests||[]);
@@ -5227,7 +5245,7 @@ async function handleAdminLogin(){
   const password = document.getElementById('adminPassword').value;
   if(!email || !password){ alert('❌ Please fill all admin fields.'); return; }
   try{
-    const res = await fetch('http://localhost:5050/admin-login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
+    const res = await fetch('/admin-login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
     const data = await res.json();
     if(res.ok && data.success){
       // Reveal admin leftbar and open Users list popup with Users list popup by default
@@ -5257,10 +5275,10 @@ async function handleAdminSignup(){
 }
 // Admin popup logic
 function showUsersPopup(){
-  openAdminPopup('Users', 'http://localhost:5050/admin/users.json', mapUsersToTable);
+  openAdminPopup('Users', '/admin/users.json', mapUsersToTable);
 }
 function showRequestsPopup(){
-  openAdminPopup('Signup Requests', 'http://localhost:5050/admin/requests.json', mapRequestsToTable);
+  openAdminPopup('Signup Requests', '/admin/requests.json', mapRequestsToTable);
 }
 
 function openAdminPopup(title, url, mapper){
@@ -5340,7 +5358,7 @@ function mapRequestsToTable(data){
 // Admin approval functions
 async function approveRequest(requestId, userEmail) {
   try {
-    const response = await fetch('http://localhost:5050/admin/approve', {
+    const response = await fetch('/admin/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ request_id: requestId, email: userEmail })
@@ -5360,7 +5378,7 @@ async function approveRequest(requestId, userEmail) {
 
 async function rejectRequest(requestId, userEmail) {
   try {
-    const response = await fetch('http://localhost:5050/admin/reject', {
+    const response = await fetch('/admin/reject', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ request_id: requestId, email: userEmail })
@@ -5388,7 +5406,7 @@ function handleSignup(){
   }
 
   // Send signup request for admin approval
-  fetch("http://localhost:5050/signup", {
+  fetch("/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password })
@@ -5441,7 +5459,7 @@ function startApprovalPolling(email){
 }
 
 function checkSignupStatus(userEmail){
-  fetch("http://localhost:5050/check-status", {
+  fetch("/check-status", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: userEmail })
@@ -5503,7 +5521,7 @@ function sendMessage(){
                        localStorage.getItem('currentDocumentContent') || '';
 
     // Send to backend and get response
-    fetch("http://localhost:5050/chat", {
+    fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
@@ -5666,7 +5684,7 @@ function startVoiceToAgent() {
                        localStorage.getItem('currentDocumentContent') || '';
 
     // Use the same chat endpoint/variables as text chat
-    fetch("http://localhost:5050/chat", {
+    fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
@@ -6156,7 +6174,7 @@ if (submitBtn) {
         const docFormData = new FormData();
         uploadedDocumentFiles.forEach(file => docFormData.append('files[]', file));
         
-        const docResponse = await fetch('http://localhost:5050/upload', {
+        const docResponse = await fetch('/upload', {
           method: 'POST',
           body: docFormData
         });
@@ -6180,7 +6198,7 @@ if (submitBtn) {
         const caseFormData = new FormData();
         uploadedCaseFiles.forEach(file => caseFormData.append('cases[]', file));
         
-        const caseResponse = await fetch('http://localhost:5050/upload-case', {
+        const caseResponse = await fetch('/upload-case', {
           method: 'POST',
           body: caseFormData
         });
@@ -6213,7 +6231,7 @@ if (submitBtn) {
             // Now analyze the content
       console.log('Sending content to analyze:', combinedContent.substring(0, 200) + '...');
       
-      const analyzeResponse = await fetch("http://localhost:5050/analyze", {
+      const analyzeResponse = await fetch("/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: combinedContent })
@@ -6289,7 +6307,7 @@ if (downloadBtn) {
     // Server generation for pdf/docx with fallback
     try {
       setBusy(true);
-      const response = await fetch('http://localhost:5050/download', {
+      const response = await fetch('/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ original: '', analysis, format: chosenFormat })
@@ -6736,7 +6754,7 @@ async function analyzeCaseDocument() {
         formData.append('files[]', file);
         
         try {
-          const response = await fetch('http://localhost:5050/upload', {
+          const response = await fetch('/upload', {
             method: 'POST',
             body: formData
           });
@@ -6901,7 +6919,7 @@ async function testModal() {
       formData.append('files[]', file);
       
       try {
-        const response = await fetch('http://localhost:5050/upload', {
+        const response = await fetch('/upload', {
           method: 'POST',
           body: formData
         });
@@ -6926,7 +6944,7 @@ async function testModal() {
     console.log('Analyzing combined content:', combinedContent.substring(0, 200) + '...');
     
     // Send to analysis endpoint
-    const analyzeResponse = await fetch("http://localhost:5050/analyze", {
+    const analyzeResponse = await fetch("/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: combinedContent })
@@ -7594,7 +7612,7 @@ async function loadCases() {
   console.log("Loading cases...");
   
   try {
-    let res = await fetch("http://127.0.0.1:5050/cases"); // Flask backend
+    let res = await fetch("/cases"); // Flask backend
     console.log("Response status:", res.status);
     
     if (!res.ok) {
@@ -7728,7 +7746,7 @@ async function loadCustomers() {
   console.log("Loading customers...");
   
   try {
-    let res = await fetch("http://127.0.0.1:5050/customers");
+    let res = await fetch("/customers");
     console.log("Customer response status:", res.status);
     
     if (!res.ok) {
@@ -7850,7 +7868,7 @@ async function saveCase(event) {
     const caseId = document.getElementById("caseId").value;
     const isUpdate = caseId && caseId.trim() !== "";
     
-    const url = isUpdate ? `http://127.0.0.1:5050/cases/${caseId}` : "http://127.0.0.1:5050/cases";
+    const url = isUpdate ? `/cases/${caseId}` : "/cases";
     const method = isUpdate ? "PUT" : "POST";
 
     const response = await fetch(url, {
@@ -7874,7 +7892,7 @@ async function saveCase(event) {
         }
         
         try {
-          const fileResponse = await fetch("http://127.0.0.1:5050/upload-case-files", {
+          const fileResponse = await fetch("/upload-case-files", {
             method: "POST",
             body: formData
           });
@@ -7912,7 +7930,7 @@ async function saveCase(event) {
                 extractFormData.append('files[]', file);
                 
                 try {
-                  const extractResponse = await fetch('http://localhost:5050/upload', {
+                  const extractResponse = await fetch('/upload', {
                     method: 'POST',
                     body: extractFormData
                   });
@@ -7936,7 +7954,7 @@ async function saveCase(event) {
             if (combinedContent) {
               console.log('Analyzing combined content:', combinedContent.substring(0, 200) + '...');
               
-              const analyzeResponse = await fetch("http://localhost:5050/analyze", {
+              const analyzeResponse = await fetch("/analyze", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ content: combinedContent })
@@ -8046,7 +8064,7 @@ async function saveCase(event) {
 async function deleteCase(caseId) {
   if (confirm('Are you sure you want to delete this case?')) {
     try {
-      const response = await fetch(`http://127.0.0.1:5050/cases/${caseId}`, {
+      const response = await fetch(`/cases/${caseId}`, {
         method: 'DELETE'
       });
       
@@ -8066,7 +8084,7 @@ async function deleteCase(caseId) {
 async function deleteCustomer(customerId) {
   if (confirm('Are you sure you want to delete this customer?')) {
     try {
-      const response = await fetch(`http://127.0.0.1:5050/customers/${customerId}`, {
+      const response = await fetch(`/customers/${customerId}`, {
         method: 'DELETE'
       });
       
@@ -8109,7 +8127,7 @@ async function saveCustomer(event) {
     const customerId = document.getElementById("customerId").value;
     const isUpdate = customerId && customerId.trim() !== "";
     
-    const url = isUpdate ? `http://127.0.0.1:5050/customers/${customerId}` : "http://127.0.0.1:5050/customers";
+    const url = isUpdate ? `/customers/${customerId}` : "/customers";
     const method = isUpdate ? "PUT" : "POST";
 
     const response = await fetch(url, {
@@ -8133,7 +8151,7 @@ async function saveCustomer(event) {
         }
         
         try {
-          const fileResponse = await fetch("http://127.0.0.1:5050/upload-customer-files", {
+          const fileResponse = await fetch("/upload-customer-files", {
             method: "POST",
             body: formData
           });
@@ -8328,7 +8346,7 @@ function sendModalMessage() {
                        localStorage.getItem('currentDocumentContent') || '';
 
     // Send to backend and get response
-    fetch("http://localhost:5050/chat", {
+    fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
@@ -8409,7 +8427,7 @@ function startVoiceToModal() {
                        window.documentText || 
                        localStorage.getItem('currentDocumentContent') || '';
 
-    fetch("http://localhost:5050/chat", {
+    fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 

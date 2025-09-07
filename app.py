@@ -89,7 +89,7 @@ DB_CONFIG = {
     "host": "legalassistantserver.postgres.database.azure.com",
     "port": 5432,
     "dbname": "Document_Drafting_and_Review_Support_Agent",
-    "user": "postgres@legalassistantserver",
+    "user": "postgres",
     "password": "Akif@123",
     "sslmode": "require"
 }
@@ -110,7 +110,9 @@ def get_connection(max_retries: int = 5, retry_delay_seconds: int = 2):
     for attempt in range(1, max_retries + 1):
         try:
             # 1) Azure-style single connection string
-            conn_str = os.environ.get("POSTGRESQL_CONNECTION")
+            #    Azure App Service exposes connection strings as
+            #    POSTGRESQLCONNSTR_<Name>. In our case: POSTGRESQLCONNSTR_POSTGRESQL_CONNECTION
+            conn_str = os.environ.get("POSTGRESQL_CONNECTION") or os.environ.get("POSTGRESQLCONNSTR_POSTGRESQL_CONNECTION")
             if conn_str:
                 return psycopg2.connect(conn_str)
 

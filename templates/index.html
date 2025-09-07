@@ -5117,6 +5117,19 @@ function adminBackToSignin(){
   if (adminContent) adminContent.classList.add('hidden');
   // Ensure user login form is visible
   switchToUser();
+  // Rewrite hardcoded localhost API base to current origin for production
+  (function(){
+    const origin = window.location.origin;
+    const originalFetch = window.fetch;
+    window.fetch = function(input, init){
+      if (typeof input === 'string'){
+        input = input
+          .replace('http://localhost:5050', origin)
+          .replace('http://127.0.0.1:5050', origin);
+      }
+      return originalFetch(input, init);
+    };
+  })();
 }
 function handleLogin(){
   const email = document.getElementById('loginEmail').value;

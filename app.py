@@ -68,6 +68,16 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 CORS(app)
 
+# -------------------- Helpers --------------------
+def normalize_passport(passport_value):
+    """Normalize passport string: remove spaces and uppercase for consistent comparisons/storage."""
+    if passport_value is None:
+        return None
+    try:
+        return ''.join(str(passport_value).split()).upper()
+    except Exception:
+        return None
+
 # DB_CONFIG = {
 #     "host": "localhost",
 #     "port": 5432,
@@ -3148,6 +3158,8 @@ def add_case():
 
         # Require matching customer by passport before inserting a case
         passport_no = data.get("passport_no")
+        if passport_no is not None:
+            passport_no = ''.join(str(passport_no).split()).upper()
         if not passport_no:
             cur.close(); conn.close()
             return jsonify({"success": False, "message": "passport_no is required and must match an existing customer"})
@@ -3164,20 +3176,20 @@ def add_case():
             cur.close(); conn.close()
             return jsonify({"error": "customer passport column not found"}), 500
 
-        # Find matching customer by passport
-        cur.execute(f"SELECT customerid FROM customer WHERE {passport_col} = %s LIMIT 1", (passport_no,))
+        # Find matching customer by passport with normalization
+        cur.execute(f"SELECT customerid FROM customer WHERE UPPER(REPLACE({passport_col}, ' ', '')) = %s LIMIT 1", (passport_no,))
         cust_row = cur.fetchone()
         if not cust_row:
             cur.close(); conn.close()
             return jsonify({"success": False, "message": "No customer found with provided passport_no"})
         matched_customer_id = cust_row[0]
         
-        # Customer linkage removed; store passport if provided
+        # Insert case linked by passport_no (FK to customer.passport_no) and also save CustomerID for convenience
         cur.execute("""
             INSERT INTO Cases 
             (CaseName, Description, CaseType, CaseStatus, CasePriority, UploadFile,
              OpenedDate, ClosedDate, DueDate, CourtName, HearingDate, JudgeName,
-             CaseCategory, Jurisdiction, CaseFee, BillingStatus, PassportNo, document_type, document_preview, CustomerID)
+             CaseCategory, Jurisdiction, CaseFee, BillingStatus, passport_no, document_type, document_preview, CustomerID)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             RETURNING CaseID
         """, (
@@ -3186,7 +3198,7 @@ def add_case():
             data.get("opened_date"), data.get("closed_date"), data.get("due_date"),
             data.get("court"), data.get("hearing_date"), data.get("judge"),
             data.get("category"), data.get("jurisdiction"), data.get("fee"),
-            data.get("billing_status", "Pending"), data.get("passport_no"), data.get("document_type", "Case"),
+            data.get("billing_status", "Pending"), passport_no, data.get("document_type", "Case"),
             data.get("document_preview"), matched_customer_id
         ))
         case_id = cur.fetchone()[0]
@@ -3198,7 +3210,8 @@ def add_case():
             passport_no = data.get("passport_no")
             conn = get_connection(); cur = conn.cursor()
             if passport_no:
-                cur.execute("SELECT caseid FROM cases WHERE passportno = %s ORDER BY caseid DESC LIMIT 1", (passport_no,))
+                norm_pass = ''.join(str(passport_no).split()).upper()
+                cur.execute("SELECT caseid FROM cases WHERE UPPER(REPLACE(passport_no, ' ', '')) = %s ORDER BY caseid DESC LIMIT 1", (norm_pass,))
                 row = cur.fetchone(); cur.close(); conn.close()
                 if row:
                     return jsonify({"id": row[0], "message": "Case already existed. Using existing record (matched by passport_no)."})
@@ -3210,6 +3223,9 @@ def add_case():
                 return jsonify({"success": True, "message": "Case exists."})
         except Exception as ee:
             return jsonify({"error": str(ee)}), 500
+    except psycopg2.errors.ForeignKeyViolation:
+        # Friendly message when passport_no doesn't exist in customer due to FK constraint
+        return jsonify({"success": False, "message": "passport_no does not match any customer. Please add/update the customer first."})
     except Exception as e:
         print(f"Error adding case: {e}")
         return jsonify({"error": str(e)}), 500
@@ -3526,6 +3542,9 @@ def add_customer():
     try:
         conn = get_connection()
         cur = conn.cursor()
+        # Normalize passport format in payload (remove spaces, uppercase) if present
+        if data.get("passport_no"):
+            data["passport_no"] = ''.join(str(data.get("passport_no")).split()).upper()
         # Detect passport column presence
         cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='customer'")
         cols = [r[0].lower() for r in cur.fetchall()]

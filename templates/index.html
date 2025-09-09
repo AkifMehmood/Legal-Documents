@@ -646,7 +646,6 @@ body.theme-dark .analysis-modal-section {
   background: #1f2937;
   border-color: #374151;
 }
-
 body.theme-dark .analysis-modal-section:hover {
   background: #374151;
   border-color: #4b5563;
@@ -1593,8 +1592,8 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
   display: flex; 
   align-items: center; 
   justify-content: space-between; 
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  margin-bottom: 24px; 
+  padding-bottom: 16px; 
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -1937,9 +1936,6 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
 #pdfAutoFillPanel .upload-section.hidden {
   display: none !important;
 }
-
-
-
 .full-screen {
   position: fixed;
   top: 0;
@@ -2581,7 +2577,6 @@ button[type="submit"]:hover {
   color: #888;
   font-size: 13px;
 }
-
 /* Buttons */
 button[type="submit"], .success-message a {
   background-color: #007bff;
@@ -3225,7 +3220,6 @@ textarea {
   min-height: 80px;
   resize: vertical;
 }
-
 .form-textarea {
   width: 100%;
   padding: 12px;
@@ -3873,7 +3867,6 @@ textarea {
   width: 90%;
   margin: 0 auto;
 }
-
 /* Enhanced Modal Content Scrolling */
 .admin-modal-content {
   scrollbar-width: thin;
@@ -4067,6 +4060,15 @@ body.theme-dark .input-row span { color: #e5e7eb; }
   .welcome-banner { padding: 20px; }
 }
 
+/* Pagination styles */
+.table-pagination { display:flex; justify-content:flex-end; margin-top:12px; }
+.pager-chip { background:#f7f7fb; border:1px solid #e5e7eb; border-radius:24px; padding:6px 8px; box-shadow:0 2px 6px rgba(0,0,0,0.06); display:flex; align-items:center; gap:6px; }
+.pager-btn { border:none; background:transparent; color:#666; padding:6px 10px; border-radius:16px; cursor:pointer; font-size:12px; }
+.pager-btn:hover { background:#eaeafe; color:#3b4cca; }
+.pager-btn.active { background:#a5b4fc; color:#fff; }
+.pager-btn:disabled { opacity:0.4; cursor:not-allowed; }
+.pager-dots { color:#999; padding:0 4px; }
+
 </style>
 </head>
 <body>
@@ -4080,7 +4082,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
       <div class="sidebar-header-icon">
         <i class="fa-solid fa-scale-balanced"></i>
       </div>
-      <div class="sidebar-header-title">Legal AI</div>
+      <div class="sidebar-header-title">Advocate Desk</div>
     </div>
 
     <!-- Main Navigation Items -->
@@ -4384,6 +4386,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     </thead>
     <tbody id="caseTableBody"></tbody>
   </table>
+  <div class="table-pagination" id="casePagination"></div>
     </div>
     
     <!-- Right-side Analysis Panel (hidden by default) -->
@@ -4515,13 +4518,16 @@ body.theme-dark .input-row span { color: #e5e7eb; }
   <!-- ================= CASE MODAL ================= -->
 <div id="caseModal" class="admin-modal hidden">
   <div class="admin-modal-content">
-    <div class="modal-header">
+    <div class="modal-header" style="position:relative;">
       <div class="header-content">
         
         <div class="header-right">
     <h2 id="caseModalTitle">Add New Case</h2>
         </div>
       </div>
+      <button type="button" aria-label="Close" onclick="closeCaseForm()" style="position:absolute; right:12px; top:10px; background:none; border:none; cursor:pointer; font-size:18px; color:#6b7280;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
   <form id="caseForm" class="form-grid">
   <input type="hidden" id="caseId"> <!-- Primary Key -->
@@ -4611,13 +4617,13 @@ body.theme-dark .input-row span { color: #e5e7eb; }
   </div>
 
   <div class="form-group">
-    <label for="customerId">Customer ID</label>
-    <input type="number" id="customerId" required>
+    <label for="casePassport">Passport No</label>
+    <input type="text" id="casePassport" required placeholder="e.g., AB1234567">
   </div>
 
   <div class="form-group">
     <label for="caseDocumentType">Document Type</label>
-    <select id="caseDocumentType">
+    <select id="caseDocumentType" disabled>
       <option value="Case">Case</option>
       <option value="Customer">Customer</option>
     </select>
@@ -4746,16 +4752,20 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     </thead>
     <tbody id="customerTableBody"></tbody>
   </table>
+  <div class="table-pagination" id="customerPagination"></div>
 
   <!-- ================= CUSTOMER MODAL ================= -->
 <div id="customerModal" class="admin-modal hidden">
   <div class="admin-modal-content">
-    <div class="modal-header">
+    <div class="modal-header" style="position:relative;">
       <div class="header-content">
         <div class="header-right">
     <h2 id="customerModalTitle">Add New Customer</h2>
         </div>
       </div>
+      <button type="button" aria-label="Close" onclick="closeCustomerForm()" style="position:absolute; right:12px; top:10px; background:none; border:none; cursor:pointer; font-size:18px; color:#6b7280;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
     <form id="customerForm" class="form-grid">
   <input type="hidden" id="customerId">
@@ -4778,6 +4788,11 @@ body.theme-dark .input-row span { color: #e5e7eb; }
   <div class="form-group">
     <label for="customerCNIC">CNIC</label>
     <input type="text" id="customerCNIC">
+  </div>
+
+  <div class="form-group">
+    <label for="customerPassport">Passport No</label>
+    <input type="text" id="customerPassport" placeholder="e.g., AB1234567">
   </div>
 
   <div class="form-group">
@@ -4831,7 +4846,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
 
   <div class="form-group">
     <label for="customerDocumentType">Document Type</label>
-    <select id="customerDocumentType">
+    <select id="customerDocumentType" disabled>
       <option value="Case">Case</option>
       <option value="Customer">Customer</option>
     </select>
@@ -4840,7 +4855,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
   <div class="form-group">
     <label for="customerFile">Upload Document</label>
     <div class="simple-file-upload">
-    <input type="file" id="customerFile" multiple>
+    <input type="file" id="customerFile" multiple onchange="handleCustomerFileSelection()">
       <div class="file-upload-placeholder">
         <i class="fa-solid fa-file-arrow-up"></i>
         <span>Choose File</span>
@@ -4848,6 +4863,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
         <em>or drag and drop</em>
       </div>
     </div>
+    <div id="customerSelectedName" style="margin-top:6px; font-size:12px; color:#374151;"></div>
   </div>
 
   <div class="modal-actions">
@@ -5836,6 +5852,18 @@ function openChat(id){
   // Update both histories
   renderChatHistory();
   renderModalChatHistory();
+  
+  // If we're in the modal, also update the modal chat display
+  const modalContainer = document.getElementById('modalChatMessages');
+  if (modalContainer && getActiveChatId()) {
+    const currentChat = next.find(c => c.id === getActiveChatId());
+    if (currentChat) {
+      openModalChat(currentChat.id);
+    } else {
+      modalContainer.innerHTML = '';
+      ensureModalChatWelcome();
+    }
+  }
 }
 function renderChatHistory(){
   // Main chat panel doesn't have a separate history section
@@ -6427,21 +6455,24 @@ pdfForm.addEventListener('submit', async (e) => {
 
   try {
     const res = await fetch("/generate_pdf", { method: "POST", body: formData });
-    const html = await res.text();
-    if (html.includes("Download PDF")) {
-      reviewSection.classList.add('hidden');
-      successSection.classList.remove('hidden');
-      
-      // Re-enable scrolling when showing success section
-      document.body.classList.remove('review-open');
-    } else {
+    if (!res.ok) {
       showError("PDF generation failed.");
+      return;
     }
+
+    // Auto-trigger download of the newly generated PDF
+    try {
+      window.location.href = '/download-pdf';
+    } catch (_) {}
+
+    // Also show success UI as a fallback
+    reviewSection.classList.add('hidden');
+    successSection.classList.remove('hidden');
+    document.body.classList.remove('review-open');
   } catch (err) {
     showError("Error generating PDF.");
   }
 });
-
 // Error display helper
 function showError(msg) {
   [uploadSection, reviewSection, successSection].forEach(el => el.classList.add('hidden'));
@@ -7012,9 +7043,6 @@ async function testModal() {
     testBtn.innerHTML = originalText;
   }
 }
-
-
-
 async function handleCaseFileSelection() {
   const fileInput = document.getElementById('caseFile');
   const previewField = document.getElementById('caseDocumentPreview');
@@ -7129,136 +7157,62 @@ async function handleCaseAudioSelection() {
 
 async function processCaseAudio() {
   const fileInput = document.getElementById('caseAudioFile');
-  const analysisSection = document.getElementById('audioAnalysisSection');
-  const audioActions = document.getElementById('audioActions');
   const processBtn = document.getElementById('processAudioBtn');
   
   if (!fileInput || !fileInput.files.length) {
     alert('Please select an audio file first.');
     return;
   }
-  
   const audioFile = fileInput.files[0];
-  console.log('Processing audio file:', audioFile.name);
-  
-  // Disable process button and show loading
-  if (processBtn) {
-    processBtn.disabled = true;
-    processBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-  }
-  
-  // Show analysis section
-  if (analysisSection) {
-    analysisSection.style.display = 'block';
-  }
-  
-  // Show loading state in all analysis sections
-  const summaryEl = document.getElementById('audioAnalysisSummary');
-  const missingEl = document.getElementById('audioAnalysisMissingClauses');
-  const riskyEl = document.getElementById('audioAnalysisRiskyLanguage');
-  const suggestionsEl = document.getElementById('audioAnalysisSuggestions');
-  
+  if (processBtn){ processBtn.disabled = true; processBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...'; }
+
+  const summaryEl = document.getElementById('audioModalSummary');
+  const missingEl = document.getElementById('audioModalMissing');
+  const riskyEl = document.getElementById('audioModalRisky');
+  const suggestionsEl = document.getElementById('audioModalSuggestions');
   if (summaryEl) summaryEl.textContent = '⏳ Processing audio file...';
   if (missingEl) missingEl.textContent = '⏳ Analyzing missing clauses...';
   if (riskyEl) riskyEl.textContent = '⏳ Checking for risky language...';
   if (suggestionsEl) suggestionsEl.textContent = '⏳ Generating suggestions...';
-  
-  // Create FormData for audio processing
+  openAudioAnalysisModal();
+
   const formData = new FormData();
   formData.append('audio', audioFile);
-  
   try {
-    const response = await fetch('/process-audio', {
-      method: 'POST',
-      body: formData
-    });
-    
+    const response = await fetch('/process-audio', { method: 'POST', body: formData });
     const data = await response.json();
-    console.log('Audio processing response:', data);
-    
     if (data.success && data.summary) {
-      // Parse the analysis text to extract different sections
       const sections = parseAnalysisText(data.summary);
-      
-      // Update each section
       if (summaryEl) summaryEl.textContent = sections.summary || 'No summary available';
       if (missingEl) missingEl.textContent = sections.missingClauses || 'No missing clauses identified';
       if (riskyEl) riskyEl.textContent = sections.riskyLanguage || 'No risky language detected';
       if (suggestionsEl) suggestionsEl.textContent = sections.suggestions || 'No suggestions available';
-      
-      // Show download actions
-      if (audioActions) {
-        audioActions.style.display = 'flex';
-      }
     } else {
-      const errorMessage = '❌ Error processing audio file.\n\nPlease try:\n• Ensure the audio file is not corrupted\n• Check that the file format is supported (.mp3, .wav, .m4a, .ogg)\n• Try a different audio file';
+      const errorMessage = '❌ Error processing audio file.';
       if (summaryEl) summaryEl.textContent = errorMessage;
       if (missingEl) missingEl.textContent = 'Error occurred during analysis';
       if (riskyEl) riskyEl.textContent = 'Error occurred during analysis';
       if (suggestionsEl) suggestionsEl.textContent = 'Error occurred during analysis';
     }
-  } catch (error) {
-    console.error('Error processing audio file:', error);
-    const errorMessage = '❌ Server error while processing audio file.\n\nPlease try again or contact support if the issue persists.';
-    if (summaryEl) summaryEl.textContent = errorMessage;
+  } catch (e) {
+    if (summaryEl) summaryEl.textContent = '❌ Server error while processing audio file.';
     if (missingEl) missingEl.textContent = 'Server error occurred';
     if (riskyEl) riskyEl.textContent = 'Server error occurred';
     if (suggestionsEl) suggestionsEl.textContent = 'Server error occurred';
-  }
-  
-  // Re-enable process button
-  if (processBtn) {
-    processBtn.disabled = false;
-    processBtn.innerHTML = '<i class="fa-solid fa-microphone"></i> Process Audio';
+  } finally {
+    if (processBtn){ processBtn.disabled = false; processBtn.innerHTML = '<i class="fa-solid fa-microphone"></i> Process Audio'; }
   }
 }
 
-// Audio download functionality
-function downloadAudioAnalysis() {
-  const summaryEl = document.getElementById('audioAnalysisSummary');
-  const missingEl = document.getElementById('audioAnalysisMissingClauses');
-  const riskyEl = document.getElementById('audioAnalysisRiskyLanguage');
-  const suggestionsEl = document.getElementById('audioAnalysisSuggestions');
-  const formatSelect = document.getElementById('audioFormatSelect');
-  
-  if (!summaryEl || !formatSelect) {
-    alert('No analysis available to download.');
-    return;
-  }
-  
-  const format = formatSelect.value;
-  const filename = `audio_analysis.${format}`;
-  
-  // Combine all analysis sections
-  const analysisContent = `AUDIO ANALYSIS REPORT
-========================
-
-1. SUMMARY:
-${summaryEl.textContent || 'No summary available'}
-
-2. MISSING CLAUSES:
-${missingEl.textContent || 'No missing clauses identified'}
-
-3. RISKY LANGUAGE:
-${riskyEl.textContent || 'No risky language detected'}
-
-4. SUGGESTIONS:
-${suggestionsEl.textContent || 'No suggestions available'}
-
----
-Generated on: ${new Date().toLocaleString()}
-`;
-  
-  // Create download link
-  const blob = new Blob([analysisContent], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
+function downloadAudioAnalysis(){
+  const format = (document.getElementById('audioFormatSelect')?.value) || 'txt';
+  const content = `AUDIO ANALYSIS\n\nSummary:\n${document.getElementById('audioModalSummary')?.textContent||''}\n\nMissing Clauses:\n${document.getElementById('audioModalMissing')?.textContent||''}\n\nRisky Language:\n${document.getElementById('audioModalRisky')?.textContent||''}\n\nSuggestions:\n${document.getElementById('audioModalSuggestions')?.textContent||''}`;
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
   const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
+  a.href = URL.createObjectURL(blob);
+  a.download = `audio_analysis.${format}`;
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(a.href);
 }
 
 function parseAnalysisText(text) {
@@ -7466,11 +7420,107 @@ function updateSummaryRender() {
   // Intentionally left minimal since we keep plain textarea only now
 }
 
+// ================= Pagination (Reusable) =================
+const PAGE_SIZE = 10;
 
+function renderPagination(containerId, totalItems, currentPage, onPageChange){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+  container.innerHTML = '';
+  container.style.display = 'flex';
+  container.style.justifyContent = 'flex-end';
+  container.style.marginTop = '12px';
 
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pager-chip';
 
+  const addBtn = (label, page, disabled=false, active=false) => {
+    const b = document.createElement('button');
+    b.className = 'pager-btn' + (active ? ' active' : '') ;
+    b.textContent = label;
+    b.disabled = disabled;
+    b.onclick = () => onPageChange(page);
+    wrapper.appendChild(b);
+  };
 
+  addBtn('‹', Math.max(1, currentPage-1), currentPage===1);
+  const totalPagesToShow = Math.min(7, Math.max(1, Math.ceil(totalItems / PAGE_SIZE)));
+  for(let p=1;p<=totalPages;p++){
+    if(p<=7 || p===totalPages){
+      addBtn(String(p), p, false, p===currentPage);
+    }
+    if(p===7 && totalPages>7){
+      const dots=document.createElement('span'); dots.className='pager-dots'; dots.textContent='…'; wrapper.appendChild(dots);
+      addBtn(String(totalPages), totalPages, false, currentPage===totalPages);
+      break;
+    }
+  }
+  addBtn('›', Math.min(totalPages, currentPage+1), currentPage===totalPages);
 
+  container.appendChild(wrapper);
+}
+
+function renderCustomersTable(list){
+  const tbody = document.getElementById('customerTableBody');
+  if(!tbody) return;
+  const items = (list && Array.isArray(list)) ? list : (window.__customers||[]);
+  const page = window.__customerPage || 1;
+  const start = (page-1)*PAGE_SIZE;
+  const pageItems = items.slice(start, start+PAGE_SIZE);
+  tbody.innerHTML = '';
+  if(pageItems.length===0){
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#666;">No customers found</td></tr>';
+  } else {
+    pageItems.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${c.name || 'N/A'}</td>
+        <td>${c.phone || '-'}</td>
+        <td>${c.email || '-'}</td>
+        <td>${c.cnic || '-'}</td>
+        <td>${c.occupation || '-'}</td>
+        <td>${c.company_name || '-'}</td>
+        <td>
+          <button onclick='openCustomerForm(${JSON.stringify(c)})' class="action-btn edit-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+          <button onclick='deleteCustomer(${c.id})' class="action-btn delete-btn" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  renderPagination('customerPagination', items.length, page, (p)=>{ window.__customerPage = p; renderCustomersTable(items); });
+}
+
+function renderCasesTable(list){
+  const tbody = document.getElementById('caseTableBody');
+  if(!tbody) return;
+  const items = (list && Array.isArray(list)) ? list : (window.__cases||[]);
+  const page = window.__casePage || 1;
+  const start = (page-1)*PAGE_SIZE;
+  const pageItems = items.slice(start, start+PAGE_SIZE);
+  tbody.innerHTML = '';
+  if(pageItems.length===0){
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#666;">No cases found</td></tr>';
+  } else {
+    pageItems.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${c.name || 'N/A'}</td>
+        <td>${c.status || 'N/A'}</td>
+        <td>${c.case_type || '-'}</td>
+        <td>${c.document_type || '-'}</td>
+        <td>${c.due_date || '-'}</td>
+        <td>${c.court || '-'}</td>
+        <td>
+          <button onclick='openCaseForm(${JSON.stringify(c)})' class="action-btn edit-btn" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+          <button onclick='deleteCase(${c.id})' class="action-btn delete-btn" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  renderPagination('casePagination', items.length, page, (p)=>{ window.__casePage = p; renderCasesTable(items); });
+}
 </script>
 </script>
 <script>
@@ -7515,6 +7565,27 @@ function updateSummaryRender() {
       }
     });
   })();
+
+  // Add asterisk to required fields' labels
+  (function(){
+    document.querySelectorAll('input[required], select[required], textarea[required]').forEach(el => {
+      const label = document.querySelector(`label[for="${el.id}"]`);
+      if (label && !/\*/.test(label.textContent)){
+        label.innerHTML = label.innerHTML + ' <span style="color:#dc2626">*</span>';
+      }
+    });
+  })();
+
+  // Show selected file names under customer upload
+  function handleCustomerFileSelection(){
+    const input = document.getElementById('customerFile');
+    const out = document.getElementById('customerSelectedName');
+    if(!input || !out) return;
+    const files = Array.from(input.files || []);
+    if(files.length === 0){ out.textContent = ''; return; }
+    const names = files.map(f => f.name).join(', ');
+    out.textContent = 'Selected: ' + names;
+  }
 
 
 
@@ -7583,7 +7654,7 @@ function openCaseForm(caseData = null) {
     document.getElementById("jurisdiction").value = caseData.jurisdiction || "";
     document.getElementById("caseFee").value = caseData.case_fee || "";
     document.getElementById("billingStatus").value = caseData.billing_status || "";
-    document.getElementById("customerId").value = caseData.customer_id || "";
+    // customer id removed from UI; keep backward compatibility if exists in data
     document.getElementById("caseDocumentType").value = caseData.document_type || "";
     document.getElementById("caseDescription").value = caseData.description || "";
     document.getElementById("caseDocumentPreview").value = caseData.document_preview || "";
@@ -7593,6 +7664,8 @@ function openCaseForm(caseData = null) {
     document.getElementById("caseForm").reset();
     document.getElementById("caseSubmitBtn").innerText = "Submit";
   }
+  const caseDocType = document.getElementById('caseDocumentType');
+  if (caseDocType){ caseDocType.value = 'Case'; caseDocType.disabled = true; }
 }
 
 function closeCaseForm() {
@@ -7612,48 +7685,22 @@ async function loadCases() {
   console.log("Loading cases...");
   
   try {
-    let res = await fetch("/cases"); // Flask backend
-    console.log("Response status:", res.status);
-    
-    if (!res.ok) {
-      console.error("Failed to fetch cases. Status:", res.status);
-      const errorText = await res.text();
-      console.error("Error response:", errorText);
-      return;
-    }
-    
-    let data = await res.json();
-    console.log("Cases data received:", data);
+    // Dummy data for pagination demo
+    let data = Array.from({length: 42}).map((_, i) => ({
+      id: i+1,
+      name: `Case ${i+1}`,
+      status: i%3===0 ? 'Open' : (i%3===1 ? 'Pending' : 'Closed'),
+      case_type: ['Civil','Criminal','Family'][i%3],
+      document_type: ['Petition','Application','Notice'][i%3],
+      due_date: '2025-09-01',
+      court: ['High Court','Session Court','Supreme Court'][i%3]
+    }));
+    console.log("Cases data (dummy):", data);
     console.log("Number of cases:", data.length);
     
     window.__cases = data;
-    
-    if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No cases found</td></tr>';
-      return;
-    }
-    
-    data.forEach((c, index) => {
-      console.log(`Processing case ${index + 1}:`, c);
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${c.name || 'N/A'}</td>
-        <td>${c.status || 'N/A'}</td>
-        <td>${c.case_type || '-'}</td>
-        <td>${c.document_type || '-'}</td>
-        <td>${c.due_date || '-'}</td>
-        <td>${c.court || '-'}</td>
-        <td>
-          <button onclick='openCaseForm(${JSON.stringify(c)})' class="action-btn edit-btn" title="Edit">
-            <i class="fa-solid fa-pen-to-square"></i>
-          </button>
-          <button onclick='deleteCase(${c.id})' class="action-btn delete-btn" title="Delete">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </td>`;
-      tbody.appendChild(tr);
-    });
-    
+    window.__casePage = 1;
+    renderCasesTable(window.__cases);
     console.log("Cases loaded successfully");
   } catch (err) {
     console.error("Failed to load cases:", err);
@@ -7663,33 +7710,15 @@ async function loadCases() {
 
 function filterCases(){
   const q = (document.getElementById('caseSearch')?.value || '').toLowerCase();
-  const tbody = document.getElementById('caseTableBody');
-  if(!tbody) return;
   const src = window.__cases || [];
-  tbody.innerHTML = '';
-  src.filter(c => {
+  const filtered = src.filter(c => {
     const text = [c.name, c.status, c.case_type, c.document_type, c.due_date, c.court]
       .map(v => (v||'').toString().toLowerCase()).join(' ');
     return text.includes(q);
-  }).forEach(c => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${c.name}</td>
-      <td>${c.status}</td>
-      <td>${c.case_type || '-'}</td>
-      <td>${c.document_type || '-'}</td>
-      <td>${c.due_date || '-'}</td>
-      <td>${c.court || '-'}</td>
-      <td>
-        <button onclick='openCaseForm(${JSON.stringify(c)})' class="action-btn edit-btn" title="Edit">
-          <i class="fa-solid fa-pen-to-square"></i>
-        </button>
-        <button onclick='deleteCase(${c.id})' class="action-btn delete-btn" title="Delete">
-          <i class="fa-solid fa-trash"></i>
-        </button>
-      </td>`;
-    tbody.appendChild(tr);
   });
+  window.__filteredCases = filtered;
+  window.__casePage = 1;
+  renderCasesTable(filtered);
 }
 
 // CUSTOMER FUNCTIONS
@@ -7727,6 +7756,8 @@ function openCustomerForm(customerData = null) {
     document.getElementById("customerForm").reset();
     document.getElementById("customerSubmitBtn").innerText = "Submit";
   }
+  const customerDocType = document.getElementById('customerDocumentType');
+  if (customerDocType){ customerDocType.value = 'Customer'; customerDocType.disabled = true; }
 }
 
 function closeCustomerForm() {
@@ -7746,48 +7777,22 @@ async function loadCustomers() {
   console.log("Loading customers...");
   
   try {
-    let res = await fetch("/customers");
-    console.log("Customer response status:", res.status);
-    
-    if (!res.ok) {
-      console.error("Failed to fetch customers. Status:", res.status);
-      const errorText = await res.text();
-      console.error("Customer error response:", errorText);
-      return;
-    }
-    
-    let data = await res.json();
-    console.log("Customers data received:", data);
+    // Dummy data for pagination demo
+    let data = Array.from({length: 57}).map((_, i) => ({
+      id: i+1,
+      name: `Customer ${i+1}`,
+      phone: `0300-0000${(i%10).toString().padStart(2,'0')}`,
+      email: `user${i+1}@example.com`,
+      cnic: `35202-12345${(i%10)}-${(i%9)+1}`,
+      occupation: ['Engineer','Lawyer','Doctor','Teacher'][i%4],
+      company_name: ['ABC Pvt','XYZ Ltd','Global Co'][i%3]
+    }));
+    console.log("Customers data (dummy):", data);
     console.log("Number of customers:", data.length);
     
     window.__customers = data;
-    
-    if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No customers found</td></tr>';
-      return;
-    }
-    
-    data.forEach((c, index) => {
-      console.log(`Processing customer ${index + 1}:`, c);
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${c.name || 'N/A'}</td>
-        <td>${c.phone || '-'}</td>
-        <td>${c.email || '-'}</td>
-        <td>${c.cnic || '-'}</td>
-        <td>${c.occupation || '-'}</td>
-        <td>${c.company_name || '-'}</td>
-        <td>
-          <button onclick='openCustomerForm(${JSON.stringify(c)})' class="action-btn edit-btn" title="Edit">
-            <i class="fa-solid fa-pen-to-square"></i>
-          </button>
-          <button onclick='deleteCustomer(${c.id})' class="action-btn delete-btn" title="Delete">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </td>`;
-      tbody.appendChild(tr);
-    });
-    
+    window.__customerPage = 1;
+    renderCustomersTable(window.__customers);
     console.log("Customers loaded successfully");
   } catch (err) {
     console.error("Failed to load customers:", err);
@@ -7797,33 +7802,15 @@ async function loadCustomers() {
 
 function filterCustomers(){
   const q = (document.getElementById('customerSearch')?.value || '').toLowerCase();
-  const tbody = document.getElementById('customerTableBody');
-  if(!tbody) return;
   const src = window.__customers || [];
-  tbody.innerHTML = '';
-  src.filter(c => {
+  const filtered = src.filter(c => {
     const text = [c.name, c.phone, c.email, c.cnic, c.occupation, c.company_name]
       .map(v => (v||'').toString().toLowerCase()).join(' ');
     return text.includes(q);
-  }).forEach(c => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${c.name}</td>
-      <td>${c.phone || '-'}</td>
-      <td>${c.email || '-'}</td>
-      <td>${c.cnic || '-'}</td>
-      <td>${c.occupation || '-'}</td>
-      <td>${c.company_name || '-'}</td>
-      <td>
-        <button onclick='openCustomerForm(${JSON.stringify(c)})' class="action-btn edit-btn" title="Edit">
-          <i class="fa-solid fa-pen-to-square"></i>
-        </button>
-        <button onclick='deleteCustomer(${c.id})' class="action-btn delete-btn" title="Delete">
-          <i class="fa-solid fa-trash"></i>
-        </button>
-      </td>`;
-    tbody.appendChild(tr);
   });
+  window.__filteredCustomers = filtered;
+  window.__customerPage = 1;
+  renderCustomersTable(filtered);
 }
 
 // Attach button listeners safely
@@ -7834,6 +7821,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add form submit event listeners
   document.getElementById("caseForm").addEventListener("submit", saveCase);
   document.getElementById("customerForm").addEventListener("submit", saveCustomer);
+  window.__customerPage = 1; window.__casePage = 1;
 });
 
 
@@ -7859,7 +7847,7 @@ async function saveCase(event) {
     jurisdiction: document.getElementById("jurisdiction").value,
     fee: document.getElementById("caseFee").value ? parseFloat(document.getElementById("caseFee").value) : null,
     billing_status: document.getElementById("billingStatus").value,
-    customer_id: parseInt(document.getElementById("customerId").value),
+    passport_no: document.getElementById("casePassport").value || null,
     document_type: document.getElementById("caseDocumentType").value,
     document_preview: document.getElementById("caseDocumentPreview").value || null
     };
@@ -8115,6 +8103,7 @@ async function saveCustomer(event) {
     date_of_birth: document.getElementById("customerDOB").value || null,
     gender: document.getElementById("customerGender").value,
     cnic: document.getElementById("customerCNIC").value,
+    passport_no: document.getElementById("customerPassport").value || null,
     occupation: document.getElementById("customerOccupation").value,
     company_name: document.getElementById("customerCompany").value,
     emergency_contact_name: document.getElementById("customerEmergencyName").value,
@@ -8179,7 +8168,6 @@ async function saveCustomer(event) {
     alert("Error saving customer. Please try again.");
   }
 }
-
 // ================= CHAT MODAL FUNCTIONS =================
 
 function openChatModal() {

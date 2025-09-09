@@ -1592,8 +1592,8 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
   display: flex; 
   align-items: center; 
   justify-content: space-between; 
-  margin-bottom: 24px; 
-  padding-bottom: 16px; 
+  margin-bottom: 24px;
+  padding-bottom: 16px;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -4082,7 +4082,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
       <div class="sidebar-header-icon">
         <i class="fa-solid fa-scale-balanced"></i>
       </div>
-      <div class="sidebar-header-title">Advocate Desk</div>
+      <div class="sidebar-header-title">Advocase AI</div>
     </div>
 
     <!-- Main Navigation Items -->
@@ -4114,12 +4114,12 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     </div>
 
   <!-- Bottom Icons -->
-  <div class="nav-bottom">
+  <div class="nav-bottom" style="margin-top: 16px; padding-top: 8px;">
     <a href="#" data-nav="settings" onclick="openSettingsModal(); setPrimaryActive(this)">
       <span>Settings</span>
       <i class="fa-solid fa-gear"></i>
     </a>
-    <a href="#" data-nav="logout" onclick="handleLogout(); setPrimaryActive(this)">
+    <a href="#" data-nav="logout" onclick="handleLogout(); setPrimaryActive(this)" style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
       <span>Logout</span>
       <i class="fa-solid fa-right-from-bracket"></i>
     </a>
@@ -6455,20 +6455,21 @@ pdfForm.addEventListener('submit', async (e) => {
 
   try {
     const res = await fetch("/generate_pdf", { method: "POST", body: formData });
-    if (!res.ok) {
-      showError("PDF generation failed.");
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || data.success !== true) {
+      showError((data && data.error) || "PDF generation failed.");
       return;
     }
 
     // Auto-trigger download of the newly generated PDF
-    try {
-      window.location.href = '/download-pdf';
-    } catch (_) {}
+    if (data.download) {
+      window.location.href = data.download;
+    }
 
     // Also show success UI as a fallback
-    reviewSection.classList.add('hidden');
-    successSection.classList.remove('hidden');
-    document.body.classList.remove('review-open');
+      reviewSection.classList.add('hidden');
+      successSection.classList.remove('hidden');
+      document.body.classList.remove('review-open');
   } catch (err) {
     showError("Error generating PDF.");
   }
@@ -7047,10 +7048,16 @@ async function handleCaseFileSelection() {
   const fileInput = document.getElementById('caseFile');
   const previewField = document.getElementById('caseDocumentPreview');
   const analyzeBtn = document.getElementById('analyzeCaseBtn');
+  const nameOut = document.getElementById('caseSelectedName');
   
   if (!fileInput || !fileInput.files.length || !previewField) return;
   
   console.log('Handling case file selection...');
+  // Show selected filenames
+  if (nameOut){
+    const names = Array.from(fileInput.files).map(f => f.name).join(', ');
+    nameOut.textContent = 'Selected: ' + names;
+  }
   // Reset any previously selected case files and preview to avoid mixing documents
   uploadedCaseFiles = Array.from(fileInput.files);
   previewField.value = '⏳ Extracting text...';
@@ -7175,7 +7182,7 @@ async function processCaseAudio() {
   if (riskyEl) riskyEl.textContent = '⏳ Checking for risky language...';
   if (suggestionsEl) suggestionsEl.textContent = '⏳ Generating suggestions...';
   openAudioAnalysisModal();
-
+  
   const formData = new FormData();
   formData.append('audio', audioFile);
   try {
@@ -7685,23 +7692,20 @@ async function loadCases() {
   console.log("Loading cases...");
   
   try {
-    // Dummy data for pagination demo
-    let data = Array.from({length: 42}).map((_, i) => ({
-      id: i+1,
-      name: `Case ${i+1}`,
-      status: i%3===0 ? 'Open' : (i%3===1 ? 'Pending' : 'Closed'),
-      case_type: ['Civil','Criminal','Family'][i%3],
-      document_type: ['Petition','Application','Notice'][i%3],
-      due_date: '2025-09-01',
-      court: ['High Court','Session Court','Supreme Court'][i%3]
-    }));
-    console.log("Cases data (dummy):", data);
-    console.log("Number of cases:", data.length);
-    
-    window.__cases = data;
+    let res = await fetch("/cases");
+    if (!res.ok) {
+      console.error("Failed to fetch cases. Status:", res.status);
+      const errorText = await res.text();
+      console.error("Error response:", errorText);
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #ff0000;">Error loading cases. Please check server and database.</td></tr>';
+      document.getElementById('casePagination') && (document.getElementById('casePagination').innerHTML = '');
+      return;
+    }
+    let data = await res.json();
+    window.__cases = Array.isArray(data) ? data : [];
     window.__casePage = 1;
     renderCasesTable(window.__cases);
-    console.log("Cases loaded successfully");
+    console.log("Cases loaded successfully", window.__cases.length);
   } catch (err) {
     console.error("Failed to load cases:", err);
     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #ff0000;">Error loading cases. Please check console for details.</td></tr>';
@@ -7777,23 +7781,20 @@ async function loadCustomers() {
   console.log("Loading customers...");
   
   try {
-    // Dummy data for pagination demo
-    let data = Array.from({length: 57}).map((_, i) => ({
-      id: i+1,
-      name: `Customer ${i+1}`,
-      phone: `0300-0000${(i%10).toString().padStart(2,'0')}`,
-      email: `user${i+1}@example.com`,
-      cnic: `35202-12345${(i%10)}-${(i%9)+1}`,
-      occupation: ['Engineer','Lawyer','Doctor','Teacher'][i%4],
-      company_name: ['ABC Pvt','XYZ Ltd','Global Co'][i%3]
-    }));
-    console.log("Customers data (dummy):", data);
-    console.log("Number of customers:", data.length);
-    
-    window.__customers = data;
+    let res = await fetch("/customers");
+    if (!res.ok) {
+      console.error("Failed to fetch customers. Status:", res.status);
+      const errorText = await res.text();
+      console.error("Customer error response:", errorText);
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #ff0000;">Error loading customers. Please check server and database.</td></tr>';
+      document.getElementById('customerPagination') && (document.getElementById('customerPagination').innerHTML = '');
+      return;
+    }
+    let data = await res.json();
+    window.__customers = Array.isArray(data) ? data : [];
     window.__customerPage = 1;
     renderCustomersTable(window.__customers);
-    console.log("Customers loaded successfully");
+    console.log("Customers loaded successfully", window.__customers.length);
   } catch (err) {
     console.error("Failed to load customers:", err);
     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #ff0000;">Error loading customers. Please check console for details.</td></tr>';

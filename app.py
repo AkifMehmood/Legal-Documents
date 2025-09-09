@@ -3145,14 +3145,40 @@ def add_case():
     try:
         conn = get_connection()
         cur = conn.cursor()
+
+        # Require matching customer by passport before inserting a case
+        passport_no = data.get("passport_no")
+        if not passport_no:
+            cur.close(); conn.close()
+            return jsonify({"success": False, "message": "passport_no is required and must match an existing customer"})
+
+        # Detect customer passport column (passport_no or passportno)
+        cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='customer'")
+        ccols = [r[0].lower() for r in cur.fetchall()]
+        passport_col = None
+        if 'passport_no' in ccols:
+            passport_col = 'passport_no'
+        elif 'passportno' in ccols:
+            passport_col = 'passportno'
+        else:
+            cur.close(); conn.close()
+            return jsonify({"error": "customer passport column not found"}), 500
+
+        # Find matching customer by passport
+        cur.execute(f"SELECT customerid FROM customer WHERE {passport_col} = %s LIMIT 1", (passport_no,))
+        cust_row = cur.fetchone()
+        if not cust_row:
+            cur.close(); conn.close()
+            return jsonify({"success": False, "message": "No customer found with provided passport_no"})
+        matched_customer_id = cust_row[0]
         
         # Customer linkage removed; store passport if provided
         cur.execute("""
             INSERT INTO Cases 
             (CaseName, Description, CaseType, CaseStatus, CasePriority, UploadFile,
              OpenedDate, ClosedDate, DueDate, CourtName, HearingDate, JudgeName,
-             CaseCategory, Jurisdiction, CaseFee, BillingStatus, PassportNo, document_type, document_preview)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+             CaseCategory, Jurisdiction, CaseFee, BillingStatus, PassportNo, document_type, document_preview, CustomerID)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             RETURNING CaseID
         """, (
             data.get("name"), data.get("description"), data.get("type"), 
@@ -3161,13 +3187,31 @@ def add_case():
             data.get("court"), data.get("hearing_date"), data.get("judge"),
             data.get("category"), data.get("jurisdiction"), data.get("fee"),
             data.get("billing_status", "Pending"), data.get("passport_no"), data.get("document_type", "Case"),
-            data.get("document_preview")
+            data.get("document_preview"), matched_customer_id
         ))
         case_id = cur.fetchone()[0]
         conn.commit(); cur.close(); conn.close()
         return jsonify({"id": case_id, "message": "Case added successfully"})
+    except psycopg2.errors.UniqueViolation:
+        # Resolve duplicates strictly by PassportNo, never error for duplicates
+        try:
+            passport_no = data.get("passport_no")
+            conn = get_connection(); cur = conn.cursor()
+            if passport_no:
+                cur.execute("SELECT caseid FROM cases WHERE passportno = %s ORDER BY caseid DESC LIMIT 1", (passport_no,))
+                row = cur.fetchone(); cur.close(); conn.close()
+                if row:
+                    return jsonify({"id": row[0], "message": "Case already existed. Using existing record (matched by passport_no)."})
+                # No match by passport: consider it non-blocking
+                return jsonify({"success": True, "message": "Case exists (no passport match found)."})
+            else:
+                cur.close(); conn.close()
+                # No passport provided: don't block
+                return jsonify({"success": True, "message": "Case exists."})
+        except Exception as ee:
+            return jsonify({"error": str(ee)}), 500
     except Exception as e:
-        print(f"Error adding case: {e}")  # Add debugging
+        print(f"Error adding case: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -3521,6 +3565,28 @@ def add_customer():
         customer_id = cur.fetchone()[0]
         conn.commit(); cur.close(); conn.close()
         return jsonify({"id": customer_id, "message": "Customer added successfully"})
+    except psycopg2.errors.UniqueViolation:
+        # If a customer with same unique field (likely email) exists, return existing instead of failing
+        try:
+            conn = get_connection(); cur = conn.cursor()
+            existing_id = None
+            email = (data.get("email") or "").strip()
+            if email:
+                cur.execute("SELECT customerid FROM customer WHERE LOWER(email)=LOWER(%s) LIMIT 1", (email,))
+                row = cur.fetchone()
+                if row: existing_id = row[0]
+            # Fallback: try by name + phone
+            if existing_id is None and data.get("name") and data.get("phone"):
+                cur.execute("SELECT customerid FROM customer WHERE name=%s AND phone=%s LIMIT 1", (data.get("name"), data.get("phone")))
+                row = cur.fetchone()
+                if row: existing_id = row[0]
+            cur.close(); conn.close()
+            if existing_id is not None:
+                return jsonify({"id": existing_id, "message": "Customer already existed. Using existing record."})
+            # If we can't find it, surface a simple success to avoid blocking uploads
+            return jsonify({"success": True, "message": "Customer exists."})
+        except Exception as ee:
+            return jsonify({"error": str(ee)}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

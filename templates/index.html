@@ -7869,6 +7869,10 @@ async function saveCase(event) {
     if (response.ok) {
       const result = await response.json();
       const caseId = isUpdate ? document.getElementById("caseId").value : result.id;
+      if (!isUpdate && !caseId) {
+        alert(result.message || "Case was not created. Please check passport/customer match.");
+        return;
+      }
       
       // Handle file uploads if any files are selected
       const caseFileInput = document.getElementById("caseFile");
@@ -8512,4 +8516,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </script>
 </html>
-An

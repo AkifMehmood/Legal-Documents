@@ -105,16 +105,18 @@ def get_connection(max_retries: int = 5, retry_delay_seconds: int = 2):
             if conn_str:
                 return psycopg2.connect(conn_str)
 
-            # 2) Discrete env vars or fallback
-            config = {
+            # 2) Discrete env vars or fallback (prefer local unless env overrides)
+            base_config = {
                 "host": os.getenv("DB_HOST", DB_CONFIG["host"]),
                 "port": int(os.getenv("DB_PORT", DB_CONFIG["port"])),
                 "dbname": os.getenv("DB_NAME", DB_CONFIG["dbname"]),
-                "user": os.getenv("DB_USER", DB_CONFIG["user"]),   # ✅ Safe
+                "user": os.getenv("DB_USER", DB_CONFIG["user"]),
                 "password": os.getenv("DB_PASSWORD", DB_CONFIG["password"]),
-                "sslmode": os.getenv("DB_SSLMODE", DB_CONFIG["sslmode"]),
             }
-            return psycopg2.connect(**config)
+            sslmode = os.getenv("DB_SSLMODE", DB_CONFIG.get("sslmode", ""))
+            if sslmode:
+                base_config["sslmode"] = sslmode
+            return psycopg2.connect(**base_config)
 
         except Exception as exc:
             last_error = exc
@@ -1314,10 +1316,8 @@ def login():
     # Expect email for login only (no username fallback)
     email = (data.get("email") or data.get("Email") or "").strip()
     password = (data.get("password") or "").strip()
-
     if not email or not password:
         return jsonify({"success": False, "message": "Email and password are required"}), 400
-
     try:
         conn = get_connection()
         cur = conn.cursor()
@@ -1328,14 +1328,11 @@ def login():
         )
         result = cur.fetchone()
         cur.close(); conn.close()
-
         if not result:
             return jsonify({"success": False, "message": "User not found or not approved."}), 404
-
         stored_hash = (result[0] or "").strip()
         if not stored_hash:
             return jsonify({"success": False, "message": "Invalid account."}), 401
-
         try:
             valid = bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8"))
         except Exception:
@@ -1348,7 +1345,6 @@ def login():
             return jsonify({"success": True, "message": "Login successful."})
         else:
             return jsonify({"success": False, "message": "Invalid password."}), 401
-
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -3147,18 +3143,12 @@ def add_case():
         conn = get_connection()
         cur = conn.cursor()
         
-        # Check if customer exists
-        customer_id = data.get("customer_id")
-        if customer_id:
-            cur.execute("SELECT CustomerID FROM Customer WHERE CustomerID = %s", (customer_id,))
-            customer_exists = cur.fetchone()
-            if not customer_exists:
-                return jsonify({"error": f"Customer with ID {customer_id} does not exist. Please create a customer first."}), 400
+        # Customer linkage removed; store passport if provided
         cur.execute("""
             INSERT INTO Cases 
             (CaseName, Description, CaseType, CaseStatus, CasePriority, UploadFile,
              OpenedDate, ClosedDate, DueDate, CourtName, HearingDate, JudgeName,
-             CaseCategory, Jurisdiction, CaseFee, BillingStatus, CustomerID, document_type, document_preview)
+             CaseCategory, Jurisdiction, CaseFee, BillingStatus, PassportNo, document_type, document_preview)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             RETURNING CaseID
         """, (
@@ -3167,7 +3157,7 @@ def add_case():
             data.get("opened_date"), data.get("closed_date"), data.get("due_date"),
             data.get("court"), data.get("hearing_date"), data.get("judge"),
             data.get("category"), data.get("jurisdiction"), data.get("fee"),
-            data.get("billing_status", "Pending"), data.get("customer_id"), data.get("document_type", "Case"),
+            data.get("billing_status", "Pending"), data.get("passport_no"), data.get("document_type", "Case"),
             data.get("document_preview")
         ))
         case_id = cur.fetchone()[0]
@@ -3404,14 +3394,17 @@ def get_customers():
         """)
         columns = cur.fetchall()
         print(f"📋 customer table columns: {[col[0] for col in columns]}")
+        colnames = [c[0].lower() for c in columns]
+        has_passport = ('passport_no' in colnames) or ('passportno' in colnames)
         
-        cur.execute("""
-            SELECT customerid, name, contactinfo, phone, email, address, profilefile,
-                   dateofbirth, gender, cnic, occupation, companyname,
-                   emergencycontactname, emergencycontactphone, notes,
-                   createddate, updateddate, document_type
-            FROM customer
-        """)
+        # Build SELECT dynamically to include passport when available
+        select_cols = (
+            "customerid, name, contactinfo, phone, email, address, profilefile, "
+            "dateofbirth, gender, cnic, "
+            + ("passport_no, " if 'passport_no' in colnames else ("passportno, " if 'passportno' in colnames else "")) +
+            "occupation, companyname, emergencycontactname, emergencycontactphone, notes, createddate, updateddate, document_type"
+        )
+        cur.execute(f"SELECT {select_cols} FROM customer")
         rows = cur.fetchall()
         print(f"📊 Found {len(rows)} customers in database")
         
@@ -3424,26 +3417,52 @@ def get_customers():
 
         customers = []
         for row in rows:
-            customers.append({
-                "id": row[0],
-                "name": row[1],
-                "contact_info": row[2],
-                "phone": row[3],
-                "email": row[4],
-                "address": row[5],
-                "profile_file": row[6],
-                "date_of_birth": row[7].isoformat() if row[7] else None,
-                "gender": row[8],
-                "cnic": row[9],
-                "occupation": row[10],
-                "company_name": row[11],
-                "emergency_contact_name": row[12],
-                "emergency_contact_phone": row[13],
-                "notes": row[14],
-                "created_date": row[15].isoformat() if row[15] else None,
-                "updated_date": row[16].isoformat() if row[16] else None,
-                "document_type": row[17]
-            })
+            # Offset changes if passport column exists
+            # Index mapping depending on presence of passport
+            if has_passport:
+                passport_idx = 10  # after cnic
+                customers.append({
+                    "id": row[0],
+                    "name": row[1],
+                    "contact_info": row[2],
+                    "phone": row[3],
+                    "email": row[4],
+                    "address": row[5],
+                    "profile_file": row[6],
+                    "date_of_birth": row[7].isoformat() if row[7] else None,
+                    "gender": row[8],
+                    "cnic": row[9],
+                    "passport_no": row[passport_idx],
+                    "occupation": row[passport_idx+1],
+                    "company_name": row[passport_idx+2],
+                    "emergency_contact_name": row[passport_idx+3],
+                    "emergency_contact_phone": row[passport_idx+4],
+                    "notes": row[passport_idx+5],
+                    "created_date": row[passport_idx+6].isoformat() if row[passport_idx+6] else None,
+                    "updated_date": row[passport_idx+7].isoformat() if row[passport_idx+7] else None,
+                    "document_type": row[passport_idx+8]
+                })
+            else:
+                customers.append({
+                    "id": row[0],
+                    "name": row[1],
+                    "contact_info": row[2],
+                    "phone": row[3],
+                    "email": row[4],
+                    "address": row[5],
+                    "profile_file": row[6],
+                    "date_of_birth": row[7].isoformat() if row[7] else None,
+                    "gender": row[8],
+                    "cnic": row[9],
+                    "occupation": row[10],
+                    "company_name": row[11],
+                    "emergency_contact_name": row[12],
+                    "emergency_contact_phone": row[13],
+                    "notes": row[14],
+                    "created_date": row[15].isoformat() if row[15] else None,
+                    "updated_date": row[16].isoformat() if row[16] else None,
+                    "document_type": row[17]
+                })
         
         print(f"✅ Successfully processed {len(customers)} customers")
         return jsonify(customers)
@@ -3460,21 +3479,42 @@ def add_customer():
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO customer 
-            (name, contactinfo, phone, email, address, profilefile, dateofbirth, 
-             gender, cnic, occupation, companyname, emergencycontactname, 
-             emergencycontactphone, notes, document_type)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING customerid
-        """, (
-            data.get("name"), data.get("contact_info"), data.get("phone"), 
-            data.get("email"), data.get("address"), data.get("profile_file"),
-            data.get("date_of_birth"), data.get("gender"), data.get("cnic"), 
-            data.get("occupation"), data.get("company_name"), 
-            data.get("emergency_contact_name"), data.get("emergency_contact_phone"),
-            data.get("notes"), data.get("document_type", "Customer")
-        ))
+        # Detect passport column presence
+        cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='customer'")
+        cols = [r[0].lower() for r in cur.fetchall()]
+        has_passport = ('passport_no' in cols) or ('passportno' in cols)
+        if has_passport:
+            cur.execute("""
+                INSERT INTO customer 
+                (name, contactinfo, phone, email, address, profilefile, dateofbirth, 
+                 gender, cnic, passport_no, occupation, companyname, emergencycontactname, 
+                 emergencycontactphone, notes, document_type)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING customerid
+            """, (
+                data.get("name"), data.get("contact_info"), data.get("phone"), 
+                data.get("email"), data.get("address"), data.get("profile_file"),
+                data.get("date_of_birth"), data.get("gender"), data.get("cnic"), 
+                data.get("passport_no"), data.get("occupation"), data.get("company_name"), 
+                data.get("emergency_contact_name"), data.get("emergency_contact_phone"),
+                data.get("notes"), data.get("document_type", "Customer")
+            ))
+        else:
+            cur.execute("""
+                INSERT INTO customer 
+                (name, contactinfo, phone, email, address, profilefile, dateofbirth, 
+                 gender, cnic, occupation, companyname, emergencycontactname, 
+                 emergencycontactphone, notes, document_type)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING customerid
+            """, (
+                data.get("name"), data.get("contact_info"), data.get("phone"), 
+                data.get("email"), data.get("address"), data.get("profile_file"),
+                data.get("date_of_birth"), data.get("gender"), data.get("cnic"), 
+                data.get("occupation"), data.get("company_name"), 
+                data.get("emergency_contact_name"), data.get("emergency_contact_phone"),
+                data.get("notes"), data.get("document_type", "Customer")
+            ))
         customer_id = cur.fetchone()[0]
         conn.commit(); cur.close(); conn.close()
         return jsonify({"id": customer_id, "message": "Customer added successfully"})

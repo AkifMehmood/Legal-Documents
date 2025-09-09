@@ -2937,26 +2937,29 @@ def generate_pdf_handler():
     global form_fields
     try:
         template_path = request.form.get("template_path")
+        if not template_path or not os.path.exists(template_path):
+            return jsonify({"success": False, "error": "Template path missing or not found"}), 400
         data = {}
-        for field in form_fields:
+        # Gracefully handle unset form_fields
+        posted_keys = request.form.keys()
+        source_fields = form_fields if form_fields else posted_keys
+        for field in source_fields:
             field_value = request.form.get(field, "")
-            data[field] = field_value  # ✅ use field name as-is
+            data[str(field)] = field_value
 
         print(f"Filling PDF with data: {data}")
         output_file = os.path.join(FILLED_DIR, "filled_form.pdf")
 
         success = fill_pdf(template_path, output_file, data)
-
         if success:
-             return render_template("<h3>✅ PDF generated successfully.</h3><a href='/download-pdf'>⬇️ Download PDF</a>")
-        else:
-             return render_template("<h3>❌ PDF generation failed.</h3><p>Please check your template and try again.</p>")
+            return jsonify({"success": True, "download": "/download-pdf"})
+        return jsonify({"success": False, "error": "Fill process failed"}), 500
 
     except Exception as e:
         print("❌ Error generating PDF:", e)
         import traceback
         traceback.print_exc()  # ✅ shows full error details in console
-        return render_template("error.html", error_message=f"Error generating PDF: {str(e)}")
+        return jsonify({"success": False, "error": f"Error generating PDF: {str(e)}"}), 500
 
 
 @app.route("/download-pdf", methods=["GET"])

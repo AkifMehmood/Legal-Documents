@@ -445,7 +445,7 @@ body.theme-dark .analysis-section label {
 .analysis-modal {
   position: fixed;
   top: 0;
-  padding-left: 130px;
+  left: 0;
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
@@ -470,7 +470,7 @@ body.theme-dark .analysis-section label {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 90%;
   max-width: 800px;
-  max-height: 90vh;
+  max-height: 92vh;
   overflow: hidden;
   transform: scale(0.9);
   transition: transform 0.3s ease;
@@ -539,7 +539,7 @@ body.theme-dark .analysis-section label {
 
 .analysis-modal-body {
   padding: 32px;
-  max-height: 60vh;
+  max-height: 58vh;
   overflow-y: auto;
 }
 
@@ -609,9 +609,11 @@ body.theme-dark .analysis-section label {
 .analysis-modal-actions {
   display: flex;
   gap: 20px;
-  padding: 24px 32px;
+  padding: 16px 24px;
   border-top: 2px solid #e2e8f0;
   background: #f8fafc;
+  position: sticky;
+  bottom: 0;
 }
 
 .analysis-modal-actions .btn {
@@ -4020,7 +4022,7 @@ textarea {
 
 /* Welcome Screen */
 .welcome-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.welcome-card { width: 100%; max-width: 1200px; background: #ffffff; border-radius: 16px; box-shadow: none; padding: 24px 28px; display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: start; min-height: 560px; }
+.welcome-card { width: 100%; max-width: 1400px; background: #ffffff; border-radius: 16px; box-shadow: none; padding: 24px 28px; display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: start; min-height: 560px; }
 .welcome-left { display: flex; align-items: flex-start; justify-content: center; }
 .welcome-left img { width: 160px; max-width: 100%; height: auto; display: block; object-fit: contain; }
 .welcome-left i { font-size: 72px; background: linear-gradient(135deg, #086ad8 0%, #1e40af 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -4148,6 +4150,16 @@ body.theme-dark .input-row span { color: #e5e7eb; }
             </div>
             <p style="margin-top:16px; color:#6b7280; font-size:14px; text-align:center; font-style:italic;">Use the left navigation to begin.</p>
           </div>
+          <div class="welcome-box" style="margin-top:16px;">
+            <h1>Instructions</h1>
+            <p>Follow these quick steps to get started with Advocase AI.</p>
+            <div class="welcome-inputs">
+              <div class="input-row"><span>Choose a module from the left menu (Cases, Customers, Documents, Chat)</span><i class="fa-solid fa-arrow-right"></i></div>
+              <div class="input-row"><span>Create or open a record to view and edit details</span><i class="fa-solid fa-arrow-right"></i></div>
+              <div class="input-row"><span>Upload files for PDF Auto Fill or Document Drafting</span><i class="fa-solid fa-arrow-right"></i></div>
+              <div class="input-row"><span>Use AI Chat to ask questions or draft content</span><i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -4234,13 +4246,18 @@ body.theme-dark .input-row span { color: #e5e7eb; }
 
   <style>
     /* Two-column layout for PDF Auto Fill */
-    .upload-two-col { display:flex; gap:32px; align-items:flex-start; justify-content:center; }
-    .upload-instructions { flex:1; max-width: 460px; background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:18px 20px; color:#374151; }
+    .upload-two-col { display:flex; gap:40px; align-items:center; justify-content:center; }
+    .upload-instructions { flex:0 0 420px; max-width: 420px; background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:18px 20px; color:#374151; }
     .upload-instructions .instructions-title { font-weight:700; margin-bottom:10px; color:#1f2937; }
     .upload-instructions ol { margin:0; padding-left:18px; line-height:1.6; }
     /* Increase upload field text sizes */
     #upload-form label, #upload-form small { font-size:14px; }
     #upload-form input[type="file"] { font-size:14px; }
+    /* Unify upload column width for both panels */
+    .upload-two-col > form, .upload-two-col > div:first-child { width:100%; max-width:560px; }
+    /* Slight downshift and centering for PDF Auto Fill */
+    #pdfAutoFillPanel .upload-section { margin-top: 8px; }
+    #pdfAutoFillPanel .upload-two-col { align-items: center; }
     @media (max-width: 900px){ .upload-two-col { flex-direction:column; } .upload-instructions{ max-width:100%; } }
   </style>
 
@@ -4249,20 +4266,20 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     <h2 style="margin: 0 0 24px 0; font-size: 24px; font-weight: 700; color: #1f2937; text-align: center;">Upload Files</h2>
     <div class="upload-two-col">
       <form id="upload-form" enctype="multipart/form-data" style="width: 100%; max-width: 560px; margin: 0;">
-        <div class="file-input-group">
-          <label>Form Template (PDF/DOCX):</label>
-          <input type="file" name="template_file" accept=".pdf,.docx" required>
+      <div class="file-input-group">
+        <label>Form Template (PDF/DOCX):</label>
+        <input type="file" name="template_file" accept=".pdf,.docx" required>
           <small>Upload template with fields like <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: 'Segoe UI', monospace;">{{name}}</code>, <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: 'Segoe UI', monospace;">{{dob}}</code></small>
-        </div>
+      </div>
 
-        <div class="file-input-group">
-          <label>Client Document (PDF/DOCX):</label>
-          <input type="file" name="client_file" accept=".pdf,.docx" required>
-          <small>Document containing client information.</small>
-        </div>
+      <div class="file-input-group">
+        <label>Client Document (PDF/DOCX):</label>
+        <input type="file" name="client_file" accept=".pdf,.docx" required>
+        <small>Document containing client information.</small>
+      </div>
 
-        <button type="submit">Process Documents</button>
-      </form>
+      <button type="submit">Process Documents</button>
+    </form>
 
       <div class="upload-instructions">
         <div class="instructions-title">Instructions</div>
@@ -4326,11 +4343,11 @@ body.theme-dark .input-row span { color: #e5e7eb; }
           <i class="fa-solid fa-file-arrow-up" style="font-size:20px; color:#94a3b8;"></i>
           <div style="font-weight:600; margin-top:4px; color:#64748b; font-size:14px;">Upload Document</div>
           <div style="color:#94a3b8; font-size:12px;">.txt, .docx, .pdf, .jpg, .png</div>
-          <input type="file" id="draftingFile" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png" style="display:none;" />
-        </div>
+      <input type="file" id="draftingFile" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png" style="display:none;" />
+    </div>
         <div id="draftingSelectedName" style="margin-top:8px; color:#374151; font-size:14px; display:none;"></div>
         <div style="margin-top:14px;">
-          <button onclick="uploadFile()" class="drafting-process-btn">Generate Draft</button>
+      <button onclick="uploadFile()" class="drafting-process-btn">Generate Draft</button>
         </div>
       </div>
 

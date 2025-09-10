@@ -4232,24 +4232,47 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     </p>
   </div>
 
+  <style>
+    /* Two-column layout for PDF Auto Fill */
+    .upload-two-col { display:flex; gap:32px; align-items:flex-start; justify-content:center; }
+    .upload-instructions { flex:1; max-width: 460px; background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:18px 20px; color:#374151; }
+    .upload-instructions .instructions-title { font-weight:700; margin-bottom:10px; color:#1f2937; }
+    .upload-instructions ol { margin:0; padding-left:18px; line-height:1.6; }
+    /* Increase upload field text sizes */
+    #upload-form label, #upload-form small { font-size:14px; }
+    #upload-form input[type="file"] { font-size:14px; }
+    @media (max-width: 900px){ .upload-two-col { flex-direction:column; } .upload-instructions{ max-width:100%; } }
+  </style>
+
   <!-- Upload Form -->
   <div id="upload-section" class="upload-section">
     <h2 style="margin: 0 0 24px 0; font-size: 24px; font-weight: 700; color: #1f2937; text-align: center;">Upload Files</h2>
-    <form id="upload-form" enctype="multipart/form-data" style="width: 100%; max-width: 500px; margin: 0 auto;">
-      <div class="file-input-group">
-        <label>Form Template (PDF/DOCX):</label>
-        <input type="file" name="template_file" accept=".pdf,.docx" required>
-        <small>Upload template with fields like <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: 'Segoe UI', monospace;">{{name}}</code>, <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: 'Segoe UI', monospace;">{{dob}}</code></small>
-      </div>
+    <div class="upload-two-col">
+      <form id="upload-form" enctype="multipart/form-data" style="width: 100%; max-width: 560px; margin: 0;">
+        <div class="file-input-group">
+          <label>Form Template (PDF/DOCX):</label>
+          <input type="file" name="template_file" accept=".pdf,.docx" required>
+          <small>Upload template with fields like <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: 'Segoe UI', monospace;">{{name}}</code>, <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: 'Segoe UI', monospace;">{{dob}}</code></small>
+        </div>
 
-      <div class="file-input-group">
-        <label>Client Document (PDF/DOCX):</label>
-        <input type="file" name="client_file" accept=".pdf,.docx" required>
-        <small>Document containing client information.</small>
-      </div>
+        <div class="file-input-group">
+          <label>Client Document (PDF/DOCX):</label>
+          <input type="file" name="client_file" accept=".pdf,.docx" required>
+          <small>Document containing client information.</small>
+        </div>
 
-      <button type="submit">Process Documents</button>
-    </form>
+        <button type="submit">Process Documents</button>
+      </form>
+
+      <div class="upload-instructions">
+        <div class="instructions-title">Instructions</div>
+        <ol>
+          <li>I. Select the blank form (PDF/DOCX) that you want to fill automatically.</li>
+          <li>II. Select the document containing the client details.</li>
+          <li>III. Click on Process Documents. The system will automatically fill your form and generate a completed PDF.</li>
+        </ol>
+      </div>
+    </div>
   </div>
 
   <!-- Review Section -->
@@ -4293,17 +4316,40 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     <h3><i class="fa-solid fa-pen-to-square"></i> Document Drafting</h3>
   </div>
 
-  <!-- Upload Section -->
-  <div class="section2" style="margin-top:0;">
-    <div class="dropzone" onclick="document.getElementById('draftingFile').click()" style="border:2px dashed #cbd5e1; background:#f8fafc; border-radius:12px; padding:16px; text-align:center; cursor:pointer; opacity:0.7;">
-      <i class="fa-solid fa-file-arrow-up" style="font-size:20px; color:#94a3b8;"></i>
-      <div style="font-weight:600; margin-top:4px; color:#64748b; font-size:14px;">Upload Document</div>
-      <div style="color:#94a3b8; font-size:11px;">.txt, .docx, .pdf, .jpg, .png</div>
-      <input type="file" id="draftingFile" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png" style="display:none;" />
-    </div>
-    <div id="draftingSelectedName" style="margin-top:6px; color:#374151; font-size:13px; display:none;"></div>
-    <div style="margin-top:12px;">
-      <button onclick="uploadFile()" class="drafting-process-btn">Generate Draft</button>
+  <!-- Upload Section (aligned with PDF Auto Fill design) -->
+  <div class="upload-section">
+    <h2 style="margin: 0 0 24px 0; font-size: 24px; font-weight: 700; color: #1f2937; text-align: center;">Upload Document</h2>
+    <div class="upload-two-col">
+      <!-- Left: Upload area -->
+      <div style="width:100%; max-width:560px;">
+        <div class="dropzone" onclick="document.getElementById('draftingFile').click()" style="border:2px dashed #cbd5e1; background:#f8fafc; border-radius:12px; padding:16px; text-align:center; cursor:pointer; opacity:0.9;">
+          <i class="fa-solid fa-file-arrow-up" style="font-size:20px; color:#94a3b8;"></i>
+          <div style="font-weight:600; margin-top:4px; color:#64748b; font-size:14px;">Upload Document</div>
+          <div style="color:#94a3b8; font-size:12px;">.txt, .docx, .pdf, .jpg, .png</div>
+          <input type="file" id="draftingFile" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png" style="display:none;" />
+        </div>
+        <div id="draftingSelectedName" style="margin-top:8px; color:#374151; font-size:14px; display:none;"></div>
+        <div style="margin-top:14px;">
+          <button onclick="uploadFile()" class="drafting-process-btn">Generate Draft</button>
+        </div>
+      </div>
+
+      <!-- Right: Instructions -->
+      <div class="upload-instructions">
+        <div class="instructions-title">Instructions</div>
+        <ol>
+          <li>I. Upload a document (supported formats: .txt, .docx, .pdf, .jpg, .png).</li>
+          <li>II. Click on Generate Draft.</li>
+          <li>III. The system will automatically generate:
+            <ul style="margin-top:6px;">
+              <li>Cover Letter</li>
+              <li>Form Data</li>
+              <li>Supporting Statement</li>
+            </ul>
+          </li>
+          <li>IV. Click on the Download button to save the generated files.</li>
+        </ol>
+      </div>
     </div>
   </div>
 
@@ -4458,6 +4504,42 @@ body.theme-dark .input-row span { color: #e5e7eb; }
           <button class="btn btn-primary" onclick="closeAnalysisModal()">
             <i class="fa-solid fa-check"></i> Done
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio Analysis Modal -->
+    <div id="audioAnalysisModal" class="analysis-modal hidden">
+      <div class="analysis-modal-content">
+        <div class="analysis-modal-header">
+          <h3><i class="fa-solid fa-microphone"></i> Audio Analysis Results</h3>
+          <button class="close-analysis-modal-btn" onclick="closeAudioAnalysisModal()">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+        <div class="analysis-modal-body">
+          <div class="analysis-modal-section">
+            <label><i class="fa-solid fa-file-text"></i> Summary</label>
+            <div class="analysis-modal-text" id="modalAudioSummary"></div>
+          </div>
+          <div class="analysis-modal-section">
+            <label><i class="fa-solid fa-exclamation-triangle"></i> Missing Clauses</label>
+            <div class="analysis-modal-text" id="modalAudioMissing"></div>
+          </div>
+          <div class="analysis-modal-section">
+            <label><i class="fa-solid fa-shield-alt"></i> Risky Language</label>
+            <div class="analysis-modal-text" id="modalAudioRisky"></div>
+          </div>
+          <div class="analysis-modal-section">
+            <label><i class="fa-solid fa-lightbulb"></i> Suggestions</label>
+            <div class="analysis-modal-text" id="modalAudioSuggestions"></div>
+          </div>
+        </div>
+        <div class="analysis-modal-actions">
+          <button class="btn btn-secondary" onclick="downloadAudioAnalysisFromModal()">
+            <i class="fa-solid fa-download"></i> Download Analysis
+          </button>
+          <button class="btn" onclick="closeAudioAnalysisModal()">Close</button>
         </div>
       </div>
     </div>
@@ -7202,10 +7284,32 @@ async function processCaseAudio() {
   }
 }
 function openAudioAnalysisModal(){
-  const section = document.getElementById('audioAnalysisSection');
-  const actions = document.getElementById('audioActions');
-  if (section){ section.style.display = 'block'; }
-  if (actions){ actions.style.display = 'flex'; }
+  // Populate modal with current inline section content
+  const modal = document.getElementById('audioAnalysisModal');
+  const summary = document.getElementById('audioAnalysisSummary')?.textContent || '';
+  const missing = document.getElementById('audioAnalysisMissingClauses')?.textContent || '';
+  const risky = document.getElementById('audioAnalysisRiskyLanguage')?.textContent || '';
+  const suggestions = document.getElementById('audioAnalysisSuggestions')?.textContent || '';
+  document.getElementById('modalAudioSummary').textContent = summary;
+  document.getElementById('modalAudioMissing').textContent = missing;
+  document.getElementById('modalAudioRisky').textContent = risky;
+  document.getElementById('modalAudioSuggestions').textContent = suggestions;
+  if (modal){ modal.classList.remove('hidden'); modal.classList.add('show'); }
+}
+
+function closeAudioAnalysisModal(){
+  const modal = document.getElementById('audioAnalysisModal');
+  if (modal){ modal.classList.add('hidden'); modal.classList.remove('show'); }
+}
+
+function downloadAudioAnalysisFromModal(){
+  const content = `AUDIO ANALYSIS\n\nSummary:\n${document.getElementById('modalAudioSummary')?.textContent||''}\n\nMissing Clauses:\n${document.getElementById('modalAudioMissing')?.textContent||''}\n\nRisky Language:\n${document.getElementById('modalAudioRisky')?.textContent||''}\n\nSuggestions:\n${document.getElementById('modalAudioSuggestions')?.textContent||''}`;
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'audio-analysis.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 function downloadAudioAnalysis(){
   const format = (document.getElementById('audioFormatSelect')?.value) || 'txt';

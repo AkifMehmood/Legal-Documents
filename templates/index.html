@@ -24,11 +24,10 @@
   }catch(e){ /* no-op */ }
 })();
 </script>
-
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f7f7f8;
   color: #000;
   height: 100vh;
@@ -400,7 +399,6 @@ body.theme-dark .theme-btn.active, body.theme-dark .theme-icon-btn.active { bord
   font-weight: 400;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
 }
-
 .analysis-actions {
   display: flex;
   gap: 16px;
@@ -683,7 +681,7 @@ body.theme-dark .analysis-actions {
   display: flex;
   flex-direction: column;
   gap: 15px; /* Reduced gap */
-  padding: 15px 0; /* Reduced padding */
+  padding: 15px 0 30px 0; /* Added more bottom padding for space below logout */
   align-items: center;
 }
 
@@ -988,8 +986,8 @@ body.theme-dark .second-sidebar .user-profile-box .email { color:#9ca3af; }
 /* Panel Header */
 .panel-header {
   display: flex;
-  justify-content: space-between;
-  align-items: top;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 24px;
   padding: 20px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -1124,7 +1122,7 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
   padding: 16px;
   border-bottom: 1px solid #f3f4f6;
   color: #374151;
-  font-size: 14px;
+  font-size: 12px;
   vertical-align: middle;
 }
 
@@ -1194,7 +1192,6 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
   border: 1px solid #e2e8f0;
   border-left: 4px solid #086ad8;
 }
-
 .thinking-dots {
   display: flex;
   align-items: center;
@@ -1430,11 +1427,15 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
   font-size: 13px; 
 }
 
+.admin-table td { 
+  font-size: 12px; 
+}
+
 .admin-table th { 
   background: #f8fafc; 
   font-weight: 600;
   color: #374151;
-  font-size: 16px;
+  font-size: 14px;
   border-bottom: 2px solid #e5e7eb;
 }
 
@@ -1592,8 +1593,8 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
   display: flex; 
   align-items: center; 
   justify-content: space-between; 
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  margin-bottom: 24px; 
+  padding-bottom: 16px; 
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -1787,7 +1788,7 @@ body.theme-dark .table-search input { color:#e5e7eb; background:transparent; }
   border: 1px solid #ddd; 
   padding: 12px 14px; 
   font-size: 15px; 
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #222; 
   box-sizing: border-box; 
   line-height: 1.6; 
@@ -1987,7 +1988,6 @@ body.chat-modal-open {
   padding: 20px;
   box-sizing: border-box;
 }
-
 .review-popup-content {
   background: white;
   border-radius: 12px;
@@ -2243,7 +2243,6 @@ button[type="submit"]:hover {
 .hidden {
   display: none;
 }
-
 /* Drafting */
   #draftingPanel {
     background: #fff;
@@ -2252,7 +2251,7 @@ button[type="submit"]:hover {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     max-width: 1000px;
     margin: 30px auto;
-    font-family: Arial, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     position: relative;
   }
 
@@ -2331,14 +2330,15 @@ button[type="submit"]:hover {
   }
 
   .drafting-results-content {
-    background: white;
+    background: #f8fafc;
     border-radius: 12px;
     width: 100%;
     max-width: 800px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
     animation: popupSlideIn 0.3s ease-out;
+    border: 1px solid #e5e7eb;
   }
 
   .drafting-results-header {
@@ -2439,7 +2439,7 @@ button[type="submit"]:hover {
     margin-bottom: 16px;
     border: 1px solid #ddd;
     background: white;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.5;
   }
 
@@ -2476,9 +2476,9 @@ button[type="submit"]:hover {
 
   /* Drafting Process Button Styling */
   .drafting-process-btn {
-    background: linear-gradient(135deg, #fde047 0%, #f59e0b 100%); /* yellow gradient */
-    color: #111827;
-    border: 1px solid #f59e0b;
+    background: linear-gradient(135deg, #086ad8 0%, #1e40af 100%); /* blue gradient */
+    color: #ffffff;
+    border: 1px solid #1e40af;
     padding: 12px 24px;
     font-size: 16px;
     font-weight: 700;
@@ -2489,7 +2489,7 @@ button[type="submit"]:hover {
     letter-spacing: 0.5px;
   }
 
-  .drafting-process-btn:hover { filter: none; background: linear-gradient(135deg, #fde047 0%, #f59e0b 100%); }
+  .drafting-process-btn:hover { filter: none; background: linear-gradient(135deg, #086ad8 0%, #1e40af 100%); }
 
   .drafting-process-btn:active {
     transform: translateY(0);
@@ -2639,7 +2639,6 @@ button[type="submit"]:hover {
 .form-field {
   margin-bottom: 20px;
 }
-
 .form-field label {
   display: block;
   font-weight: 600;
@@ -2667,7 +2666,7 @@ button[type="submit"]:hover {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     max-width: 1000px;
     margin: 30px auto;
-    font-family: Arial, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   }
 
   #draftingPanel h2 {
@@ -2817,11 +2816,12 @@ button[type="submit"]:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: move;
   box-shadow: 0 8px 32px rgba(8, 106, 216, 0.35);
   transition: all 0.3s ease;
   z-index: 1000;
   border: 3px solid #ffffff;
+  user-select: none;
 }
 
 .floating-chat-icon:hover {
@@ -3025,7 +3025,6 @@ button[type="submit"]:hover {
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
   transform: translateY(-1px);
 }
-
 .chat-send-btn, .chat-voice-btn {
   background: linear-gradient(135deg, #086ad8 0%, #1e40af 100%);
   border: none;
@@ -3229,7 +3228,7 @@ textarea {
   resize: vertical;
   min-height: 100px;
   background-color: #f9fafb;
-  font-family: 'Courier New', monospace;
+  font-family: "Segoe UI", "Courier New", monospace;
   font-size: 12px;
   line-height: 1.4;
 }
@@ -3420,7 +3419,6 @@ textarea {
   opacity: 0.7;
   pointer-events: none;
 }
-
 /* Form submission feedback */
 .form-submitting {
   position: relative;
@@ -3817,7 +3815,6 @@ textarea {
 .form-group:not(:last-child) {
   margin-bottom: 0;
 }
-
 /* Simple form layout */
 .form-grid {
   display: grid;
@@ -4035,9 +4032,11 @@ textarea {
 .welcome-right p { margin: 0; color: #6b7280; }
 .welcome-banner p { text-align: left; font-size: 16px; line-height: 1.5; }
 /* right-bottom content box */
-.welcome-box { margin: 20px 0 0 -65px; width: 100%; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e5e7eb; border-radius: 16px; padding: 28px 32px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); display: flex; flex-direction: column; min-height: 320px; }
+.welcome-box { margin: 20px 0 0 -65px; width: 100%; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e5e7eb; border-radius: 16px; padding: 28px 32px; box-shadow: none; display: flex; flex-direction: column; min-height: 320px; }
 .welcome-features { display:none; }
-.welcome-inputs { margin: 12px 0 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; width: 100%; }
+.welcome-inputs { margin: 12px auto 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; width: 90%; justify-content: center; }
+.welcome-box h1 { margin: 0 0 6px 0; text-align: center; font-size: 28px; font-weight: 800; color: #111827; }
+.welcome-box p { margin: 0 0 20px 0; color: #6b7280; text-align: center; font-size: 16px; line-height: 1.5; }
 .input-row { display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); width: 90%; min-height: 70px; cursor: pointer; transition: all 0.3s ease; overflow: hidden; }
 .input-row span { color: #374151; font-weight: 600; font-size: 14px; line-height: 1.3; text-align: left; flex: 1; margin-right: 16px; word-wrap: break-word; overflow-wrap: break-word; max-width: 100%; }
 .input-row i { color: #6b7280; font-size: 16px; transition: all 0.3s ease; }
@@ -4049,6 +4048,8 @@ body.theme-dark .welcome-card { background: #19191D; box-shadow: none; }
 body.theme-dark .welcome-right h1 { color: #ffffff; }
 body.theme-dark .welcome-right p { color: #e5e7eb; }
 body.theme-dark .welcome-box { background: #19191D; border-color: #2A2A30; box-shadow: none; }
+body.theme-dark .welcome-box h1 { color: #ffffff; }
+body.theme-dark .welcome-box p { color: #e5e7eb; }
 body.theme-dark .input-row { background: #19191D; border-color: #2A2A30; box-shadow: none; }
 body.theme-dark .input-row span { color: #e5e7eb; }
 
@@ -4114,7 +4115,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     </div>
 
   <!-- Bottom Icons -->
-  <div class="nav-bottom" style="margin-top: auto; padding-top: 8px;">
+  <div class="nav-bottom" style="margin-top: auto; padding-top: 8px; margin-bottom: 20px;">
     <a href="#" data-nav="settings" onclick="openSettingsModal(); setPrimaryActive(this)">
       <span>Settings</span>
       <i class="fa-solid fa-gear"></i>
@@ -4135,11 +4136,9 @@ body.theme-dark .input-row span { color: #e5e7eb; }
          
         </div>
         <div class="welcome-right">
-          <div class="welcome-banner">
+          <div class="welcome-box">
             <h1>Welcome to Advocase AI</h1>
             <p>Your AI‑powered workspace for cases, customers, documents, and more. Pick a task below to get started.</p>
-          </div>
-          <div class="welcome-box">
             <div class="welcome-inputs">
               <div class="input-row"><span>Cases — Track type, document, due date, court</span><i class="fa-solid fa-arrow-right"></i></div>
               <div class="input-row"><span>Customers — Manage client information</span><i class="fa-solid fa-arrow-right"></i></div>
@@ -4240,7 +4239,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
       <div class="file-input-group">
         <label>Form Template (PDF/DOCX):</label>
         <input type="file" name="template_file" accept=".pdf,.docx" required>
-        <small>Upload template with fields like <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace;">{{name}}</code>, <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace;">{{dob}}</code></small>
+        <small>Upload template with fields like <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: 'Segoe UI', monospace;">{{name}}</code>, <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: 'Segoe UI', monospace;">{{dob}}</code></small>
       </div>
 
       <div class="file-input-group">
@@ -4296,10 +4295,10 @@ body.theme-dark .input-row span { color: #e5e7eb; }
 
   <!-- Upload Section -->
   <div class="section2" style="margin-top:0;">
-    <div class="dropzone" onclick="document.getElementById('draftingFile').click()" style="border:2px dashed #e5e7eb; background:#fff; border-radius:12px; padding:24px; text-align:center; cursor:pointer;">
-      <i class="fa-solid fa-file-arrow-up" style="font-size:28px; color:orange;"></i>
-      <div style="font-weight:700; margin-top:6px;">Upload Document</div>
-      <div style="color:#777; font-size:12px;">.txt, .docx, .pdf, .jpg, .png</div>
+    <div class="dropzone" onclick="document.getElementById('draftingFile').click()" style="border:2px dashed #cbd5e1; background:#f8fafc; border-radius:12px; padding:16px; text-align:center; cursor:pointer; opacity:0.7;">
+      <i class="fa-solid fa-file-arrow-up" style="font-size:20px; color:#94a3b8;"></i>
+      <div style="font-weight:600; margin-top:4px; color:#64748b; font-size:14px;">Upload Document</div>
+      <div style="color:#94a3b8; font-size:11px;">.txt, .docx, .pdf, .jpg, .png</div>
       <input type="file" id="draftingFile" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png" style="display:none;" />
     </div>
     <div id="draftingSelectedName" style="margin-top:6px; color:#374151; font-size:13px; display:none;"></div>
@@ -5907,9 +5906,6 @@ function deleteChat(id){
     }
   }
 }
-
-
-
 function showUploadUI() {
   // Hide welcome screen
   const welcomeScreen = document.getElementById('welcomeScreen');
@@ -6302,7 +6298,6 @@ if (submitBtn) {
     }
   });
 }
-
 if (downloadBtn) {
   downloadBtn.addEventListener('click', async () => {
     const chosenFormat = (formatSelect?.value || 'txt');
@@ -6460,12 +6455,10 @@ pdfForm.addEventListener('submit', async (e) => {
       showError((data && data.error) || "PDF generation failed.");
       return;
     }
-
     // Auto-trigger download of the newly generated PDF
     if (data.download) {
       window.location.href = data.download;
     }
-
     // Also show success UI as a fallback
       reviewSection.classList.add('hidden');
       successSection.classList.remove('hidden');
@@ -6694,7 +6687,6 @@ function closeAnalysisModal() {
     console.log('Analysis modal closed');
   }
 }
-
 // Add click outside to close functionality
 document.addEventListener('DOMContentLoaded', function() {
   const analysisModal = document.getElementById('analysisModal');
@@ -7172,11 +7164,10 @@ async function processCaseAudio() {
   }
   const audioFile = fileInput.files[0];
   if (processBtn){ processBtn.disabled = true; processBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...'; }
-
-  const summaryEl = document.getElementById('audioModalSummary');
-  const missingEl = document.getElementById('audioModalMissing');
-  const riskyEl = document.getElementById('audioModalRisky');
-  const suggestionsEl = document.getElementById('audioModalSuggestions');
+  const summaryEl = document.getElementById('audioAnalysisSummary');
+  const missingEl = document.getElementById('audioAnalysisMissingClauses');
+  const riskyEl = document.getElementById('audioAnalysisRiskyLanguage');
+  const suggestionsEl = document.getElementById('audioAnalysisSuggestions');
   if (summaryEl) summaryEl.textContent = '⏳ Processing audio file...';
   if (missingEl) missingEl.textContent = '⏳ Analyzing missing clauses...';
   if (riskyEl) riskyEl.textContent = '⏳ Checking for risky language...';
@@ -7210,10 +7201,15 @@ async function processCaseAudio() {
     if (processBtn){ processBtn.disabled = false; processBtn.innerHTML = '<i class="fa-solid fa-microphone"></i> Process Audio'; }
   }
 }
-
+function openAudioAnalysisModal(){
+  const section = document.getElementById('audioAnalysisSection');
+  const actions = document.getElementById('audioActions');
+  if (section){ section.style.display = 'block'; }
+  if (actions){ actions.style.display = 'flex'; }
+}
 function downloadAudioAnalysis(){
   const format = (document.getElementById('audioFormatSelect')?.value) || 'txt';
-  const content = `AUDIO ANALYSIS\n\nSummary:\n${document.getElementById('audioModalSummary')?.textContent||''}\n\nMissing Clauses:\n${document.getElementById('audioModalMissing')?.textContent||''}\n\nRisky Language:\n${document.getElementById('audioModalRisky')?.textContent||''}\n\nSuggestions:\n${document.getElementById('audioModalSuggestions')?.textContent||''}`;
+  const content = `AUDIO ANALYSIS\n\nSummary:\n${document.getElementById('audioAnalysisSummary')?.textContent||''}\n\nMissing Clauses:\n${document.getElementById('audioAnalysisMissingClauses')?.textContent||''}\n\nRisky Language:\n${document.getElementById('audioAnalysisRiskyLanguage')?.textContent||''}\n\nSuggestions:\n${document.getElementById('audioAnalysisSuggestions')?.textContent||''}`;
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -7429,7 +7425,6 @@ function updateSummaryRender() {
 
 // ================= Pagination (Reusable) =================
 const PAGE_SIZE = 10;
-
 function renderPagination(containerId, totalItems, currentPage, onPageChange){
   const container = document.getElementById(containerId);
   if(!container) return;
@@ -7439,10 +7434,8 @@ function renderPagination(containerId, totalItems, currentPage, onPageChange){
   container.style.display = 'flex';
   container.style.justifyContent = 'flex-end';
   container.style.marginTop = '12px';
-
   const wrapper = document.createElement('div');
   wrapper.className = 'pager-chip';
-
   const addBtn = (label, page, disabled=false, active=false) => {
     const b = document.createElement('button');
     b.className = 'pager-btn' + (active ? ' active' : '') ;
@@ -7451,7 +7444,6 @@ function renderPagination(containerId, totalItems, currentPage, onPageChange){
     b.onclick = () => onPageChange(page);
     wrapper.appendChild(b);
   };
-
   addBtn('‹', Math.max(1, currentPage-1), currentPage===1);
   const totalPagesToShow = Math.min(7, Math.max(1, Math.ceil(totalItems / PAGE_SIZE)));
   for(let p=1;p<=totalPages;p++){
@@ -7465,10 +7457,8 @@ function renderPagination(containerId, totalItems, currentPage, onPageChange){
     }
   }
   addBtn('›', Math.min(totalPages, currentPage+1), currentPage===totalPages);
-
   container.appendChild(wrapper);
 }
-
 function renderCustomersTable(list){
   const tbody = document.getElementById('customerTableBody');
   if(!tbody) return;
@@ -7498,7 +7488,6 @@ function renderCustomersTable(list){
   }
   renderPagination('customerPagination', items.length, page, (p)=>{ window.__customerPage = p; renderCustomersTable(items); });
 }
-
 function renderCasesTable(list){
   const tbody = document.getElementById('caseTableBody');
   if(!tbody) return;
@@ -7582,7 +7571,6 @@ function renderCasesTable(list){
       }
     });
   })();
-
   // Show selected file names under customer upload
   function handleCustomerFileSelection(){
     const input = document.getElementById('customerFile');
@@ -7593,7 +7581,6 @@ function renderCasesTable(list){
     const names = files.map(f => f.name).join(', ');
     out.textContent = 'Selected: ' + names;
   }
-
 
 
   // Show drafting panel
@@ -7824,9 +7811,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("customerForm").addEventListener("submit", saveCustomer);
   window.__customerPage = 1; window.__casePage = 1;
 });
-
-
-
 async function saveCase(event) {
   event.preventDefault();
   
@@ -8175,6 +8159,70 @@ async function saveCustomer(event) {
 }
 // ================= CHAT MODAL FUNCTIONS =================
 
+// Draggable chat icon functionality
+let isDragging = false;
+let currentX;
+let currentY;
+let initialX;
+let initialY;
+let xOffset = 0;
+let yOffset = 0;
+
+function initDrag() {
+  const chatIcon = document.querySelector('.floating-chat-icon');
+  if (!chatIcon) return;
+
+  chatIcon.addEventListener('mousedown', dragStart);
+  chatIcon.addEventListener('mousemove', drag);
+  chatIcon.addEventListener('mouseup', dragEnd);
+  chatIcon.addEventListener('mouseleave', dragEnd);
+  
+  // Touch events for mobile
+  chatIcon.addEventListener('touchstart', dragStart);
+  chatIcon.addEventListener('touchmove', drag);
+  chatIcon.addEventListener('touchend', dragEnd);
+}
+
+function dragStart(e) {
+  if (e.type === "touchstart") {
+    initialX = e.touches[0].clientX - xOffset;
+    initialY = e.touches[0].clientY - yOffset;
+  } else {
+    initialX = e.clientX - xOffset;
+    initialY = e.clientY - yOffset;
+  }
+
+  if (e.target === e.currentTarget) {
+    isDragging = true;
+  }
+}
+
+function drag(e) {
+  if (isDragging) {
+    e.preventDefault();
+    
+    if (e.type === "touchmove") {
+      currentX = e.touches[0].clientX - initialX;
+      currentY = e.touches[0].clientY - initialY;
+    } else {
+      currentX = e.clientX - initialX;
+      currentY = e.clientY - initialY;
+    }
+
+    xOffset = currentX;
+    yOffset = currentY;
+
+    const chatIcon = document.querySelector('.floating-chat-icon');
+    chatIcon.style.transform = `translate(${currentX}px, ${currentY}px)`;
+  }
+}
+
+function dragEnd(e) {
+  initialX = currentX;
+  initialY = currentY;
+  isDragging = false;
+}
+
 function openChatModal() {
   const modal = document.getElementById('chatModal');
   modal.classList.remove('hidden');
@@ -8224,7 +8272,6 @@ function startNewChatInModal() {
   if (historyPanel) historyPanel.classList.add('hidden');
   container.style.display = 'block';
 }
-
 function toggleChatHistory() {
   const historyPanel = document.getElementById('chatHistoryPanel');
   const messagesContainer = document.getElementById('modalChatMessages');
@@ -8491,6 +8538,9 @@ try {
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Initializing chat functionality...'); // Debug log
   
+  // Initialize draggable chat icon
+  initDrag();
+  
   // Initialize chat histories
   renderChatHistory();
   renderModalChatHistory();
@@ -8515,4 +8565,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+</body>
 </html>

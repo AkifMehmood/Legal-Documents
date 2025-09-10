@@ -4251,21 +4251,21 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     @media (max-width: 900px){ .upload-two-col { flex-direction:column; } .upload-instructions{ max-width:100%; } }
 
     /* Welcome-style boxes inside PDF Auto Fill */
-    #pdfAutoFillPanel .welcome-box { margin: 0; width: 100%; padding: 24px 28px; }
-    #pdfAutoFillPanel .pdf-form-box { max-width: 560px; }
-    #pdfAutoFillPanel .pdf-instructions-box { max-width: 560px; }
+    #pdfAutoFillPanel .welcome-box { margin: 0; width: 100%; padding: 24px 28px; min-height: 400px; }
+    #pdfAutoFillPanel .pdf-form-box { max-width: 100%; flex: 1; }
+    #pdfAutoFillPanel .pdf-instructions-box { max-width: 100%; flex: 1; }
     #pdfAutoFillPanel .pdf-instructions-box h1 { text-align: left; font-size: 22px; margin-bottom: 8px; }
     #pdfAutoFillPanel .pdf-instructions-box ol { margin: 0; padding-left: 18px; line-height: 1.6; color: #374151; }
     #pdfAutoFillPanel .pdf-illustration { width: 100%; height: auto; border-radius: 12px; border: 1px solid #e5e7eb; background: #f8fafc; margin-bottom: 12px; }
 
-    /* Welcome-style boxes inside Document Drafting */
+    /* Welcome-style boxes inside Document Drafting - match PDF Auto Fill exactly */
     #draftingPanel .welcome-box { margin: 0; width: 100%; padding: 24px 28px; }
     #draftingPanel .drafting-form-box { max-width: 560px; }
     #draftingPanel .drafting-instructions-box { max-width: 560px; }
     #draftingPanel .drafting-instructions-box h1 { text-align: left; font-size: 22px; margin-bottom: 8px; }
     #draftingPanel .drafting-instructions-box ol { margin: 0; padding-left: 18px; line-height: 1.6; color: #374151; }
     #draftingPanel .drafting-illustration { width: 100%; height: auto; border-radius: 12px; border: 1px solid #e5e7eb; background: #f8fafc; margin-bottom: 12px; }
-    /* Make Document Drafting container extend to header */
+    /* Make Document Drafting container extend to header - match PDF Auto Fill */
     #draftingPanel .upload-section { margin-top: 8px; }
     #draftingPanel .upload-two-col { align-items: center; }
   </style>

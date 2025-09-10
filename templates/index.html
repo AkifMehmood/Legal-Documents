@@ -4150,7 +4150,6 @@ body.theme-dark .input-row span { color: #e5e7eb; }
             </div>
             <p style="margin-top:16px; color:#6b7280; font-size:14px; text-align:center; font-style:italic;">Use the left navigation to begin.</p>
           </div>
-          
         </div>
       </div>
     </div>
@@ -4266,6 +4265,9 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     #draftingPanel .drafting-instructions-box h1 { text-align: left; font-size: 22px; margin-bottom: 8px; }
     #draftingPanel .drafting-instructions-box ol { margin: 0; padding-left: 18px; line-height: 1.6; color: #374151; }
     #draftingPanel .drafting-illustration { width: 100%; height: auto; border-radius: 12px; border: 1px solid #e5e7eb; background: #f8fafc; margin-bottom: 12px; }
+    /* Make Document Drafting container extend to header */
+    #draftingPanel .upload-section { margin-top: 8px; }
+    #draftingPanel .upload-two-col { align-items: center; }
   </style>
 
   <!-- Upload Form -->
@@ -4291,12 +4293,12 @@ body.theme-dark .input-row span { color: #e5e7eb; }
       </div>
 
       <div class="welcome-box pdf-instructions-box">
-        <img class="pdf-illustration" alt="PDF Auto Fill Illustration" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360'%3E%3Crect width='100%25' height='100%25' rx='12' ry='12' fill='%23f8fafc'/%3E%3Cg fill='none' stroke='%23cbd5e1'%3E%3Crect x='40' y='40' width='560' height='280' rx='8'/%3E%3Cpath d='M100 110h440M100 150h440M100 190h440M100 230h300'/%3E%3C/g%3E%3C/svg%3E" />
         <h1>Instructions</h1>
-        <ol>
-          <li>I. Select the blank form (PDF/DOCX) that you want to fill automatically.</li>
-          <li>II. Select the document containing the client details.</li>
-          <li>III. Click on Process Documents. The system will automatically fill your form and generate a completed PDF.</li>
+        <p>Follow these steps to use PDF Auto Fill.</p>
+        <ol style="margin: 0; padding-left: 18px; line-height: 1.6; color: #374151;">
+          <li>Select the blank form (PDF/DOCX) that you want to fill automatically</li>
+          <li>Select the document containing the client details</li>
+          <li>Click Process Documents to generate completed PDF</li>
         </ol>
       </div>
     </div>
@@ -4341,14 +4343,15 @@ body.theme-dark .input-row span { color: #e5e7eb; }
 <div id="draftingPanel"  class="chat-panel" style="display: none; padding-top:8px;">
   <div class="panel-header">
     <h3><i class="fa-solid fa-pen-to-square"></i> Document Drafting</h3>
+    <p class="description" style="margin: 0; color: #6b7280; font-size: 14px;">
+    </p>
   </div>
 
-  <!-- Upload Section (welcome-style boxes) -->
+  <!-- Upload Section (aligned with PDF Auto Fill design) -->
   <div class="upload-section">
     <h2 style="margin: 0 0 24px 0; font-size: 24px; font-weight: 700; color: #1f2937; text-align: center;">Upload Document</h2>
     <div class="upload-two-col">
-      <!-- Left: Upload area in welcome box -->
-      <div class="welcome-box drafting-form-box" style="width:100%;">
+      <div class="welcome-box drafting-form-box">
         <div class="dropzone" onclick="document.getElementById('draftingFile').click()" style="border:2px dashed #cbd5e1; background:#f8fafc; border-radius:12px; padding:16px; text-align:center; cursor:pointer; opacity:0.9;">
           <i class="fa-solid fa-file-arrow-up" style="font-size:20px; color:#94a3b8;"></i>
           <div style="font-weight:600; margin-top:4px; color:#64748b; font-size:14px;">Upload Document</div>
@@ -4361,21 +4364,20 @@ body.theme-dark .input-row span { color: #e5e7eb; }
         </div>
       </div>
 
-      <!-- Right: Instructions in welcome box with optional image -->
       <div class="welcome-box drafting-instructions-box">
-        <img class="drafting-illustration" alt="Document Drafting Illustration" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360'%3E%3Crect width='100%25' height='100%25' rx='12' ry='12' fill='%23f8fafc'/%3E%3Cg fill='none' stroke='%23cbd5e1'%3E%3Crect x='40' y='40' width='560' height='280' rx='8'/%3E%3Cpath d='M120 110h400M120 150h400M120 190h320'/%3E%3C/g%3E%3C/svg%3E" />
         <h1>Instructions</h1>
-        <ol>
-          <li>I. Upload a document (supported formats: .txt, .docx, .pdf, .jpg, .png).</li>
-          <li>II. Click on Generate Draft.</li>
-          <li>III. The system will automatically generate:
+        <p>Follow these steps to use Document Drafting.</p>
+        <ol style="margin: 0; padding-left: 18px; line-height: 1.6; color: #374151;">
+          <li>Upload a document (supported formats: .txt, .docx, .pdf, .jpg, .png)</li>
+          <li>Click on Generate Draft</li>
+          <li>The system will automatically generate:
             <ul style="margin-top:6px;">
               <li>Cover Letter</li>
               <li>Form Data</li>
               <li>Supporting Statement</li>
             </ul>
           </li>
-          <li>IV. Click on the Download button to save the generated files.</li>
+          <li>Click on the Download button to save the generated files</li>
         </ol>
       </div>
     </div>

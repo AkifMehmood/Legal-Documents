@@ -4150,16 +4150,7 @@ body.theme-dark .input-row span { color: #e5e7eb; }
             </div>
             <p style="margin-top:16px; color:#6b7280; font-size:14px; text-align:center; font-style:italic;">Use the left navigation to begin.</p>
           </div>
-          <div class="welcome-box" style="margin-top:16px;">
-            <h1>Instructions</h1>
-            <p>Follow these quick steps to get started with Advocase AI.</p>
-            <div class="welcome-inputs">
-              <div class="input-row"><span>Choose a module from the left menu (Cases, Customers, Documents, Chat)</span><i class="fa-solid fa-arrow-right"></i></div>
-              <div class="input-row"><span>Create or open a record to view and edit details</span><i class="fa-solid fa-arrow-right"></i></div>
-              <div class="input-row"><span>Upload files for PDF Auto Fill or Document Drafting</span><i class="fa-solid fa-arrow-right"></i></div>
-              <div class="input-row"><span>Use AI Chat to ask questions or draft content</span><i class="fa-solid fa-arrow-right"></i></div>
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>
@@ -4259,13 +4250,30 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     #pdfAutoFillPanel .upload-section { margin-top: 8px; }
     #pdfAutoFillPanel .upload-two-col { align-items: center; }
     @media (max-width: 900px){ .upload-two-col { flex-direction:column; } .upload-instructions{ max-width:100%; } }
+
+    /* Welcome-style boxes inside PDF Auto Fill */
+    #pdfAutoFillPanel .welcome-box { margin: 0; width: 100%; padding: 24px 28px; }
+    #pdfAutoFillPanel .pdf-form-box { max-width: 560px; }
+    #pdfAutoFillPanel .pdf-instructions-box { max-width: 560px; }
+    #pdfAutoFillPanel .pdf-instructions-box h1 { text-align: left; font-size: 22px; margin-bottom: 8px; }
+    #pdfAutoFillPanel .pdf-instructions-box ol { margin: 0; padding-left: 18px; line-height: 1.6; color: #374151; }
+    #pdfAutoFillPanel .pdf-illustration { width: 100%; height: auto; border-radius: 12px; border: 1px solid #e5e7eb; background: #f8fafc; margin-bottom: 12px; }
+
+    /* Welcome-style boxes inside Document Drafting */
+    #draftingPanel .welcome-box { margin: 0; width: 100%; padding: 24px 28px; }
+    #draftingPanel .drafting-form-box { max-width: 560px; }
+    #draftingPanel .drafting-instructions-box { max-width: 560px; }
+    #draftingPanel .drafting-instructions-box h1 { text-align: left; font-size: 22px; margin-bottom: 8px; }
+    #draftingPanel .drafting-instructions-box ol { margin: 0; padding-left: 18px; line-height: 1.6; color: #374151; }
+    #draftingPanel .drafting-illustration { width: 100%; height: auto; border-radius: 12px; border: 1px solid #e5e7eb; background: #f8fafc; margin-bottom: 12px; }
   </style>
 
   <!-- Upload Form -->
   <div id="upload-section" class="upload-section">
     <h2 style="margin: 0 0 24px 0; font-size: 24px; font-weight: 700; color: #1f2937; text-align: center;">Upload Files</h2>
     <div class="upload-two-col">
-      <form id="upload-form" enctype="multipart/form-data" style="width: 100%; max-width: 560px; margin: 0;">
+      <div class="welcome-box pdf-form-box">
+      <form id="upload-form" enctype="multipart/form-data" style="width: 100%; margin: 0;">
       <div class="file-input-group">
         <label>Form Template (PDF/DOCX):</label>
         <input type="file" name="template_file" accept=".pdf,.docx" required>
@@ -4280,9 +4288,11 @@ body.theme-dark .input-row span { color: #e5e7eb; }
 
       <button type="submit">Process Documents</button>
     </form>
+      </div>
 
-      <div class="upload-instructions">
-        <div class="instructions-title">Instructions</div>
+      <div class="welcome-box pdf-instructions-box">
+        <img class="pdf-illustration" alt="PDF Auto Fill Illustration" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360'%3E%3Crect width='100%25' height='100%25' rx='12' ry='12' fill='%23f8fafc'/%3E%3Cg fill='none' stroke='%23cbd5e1'%3E%3Crect x='40' y='40' width='560' height='280' rx='8'/%3E%3Cpath d='M100 110h440M100 150h440M100 190h440M100 230h300'/%3E%3C/g%3E%3C/svg%3E" />
+        <h1>Instructions</h1>
         <ol>
           <li>I. Select the blank form (PDF/DOCX) that you want to fill automatically.</li>
           <li>II. Select the document containing the client details.</li>
@@ -4333,12 +4343,12 @@ body.theme-dark .input-row span { color: #e5e7eb; }
     <h3><i class="fa-solid fa-pen-to-square"></i> Document Drafting</h3>
   </div>
 
-  <!-- Upload Section (aligned with PDF Auto Fill design) -->
+  <!-- Upload Section (welcome-style boxes) -->
   <div class="upload-section">
     <h2 style="margin: 0 0 24px 0; font-size: 24px; font-weight: 700; color: #1f2937; text-align: center;">Upload Document</h2>
     <div class="upload-two-col">
-      <!-- Left: Upload area -->
-      <div style="width:100%; max-width:560px;">
+      <!-- Left: Upload area in welcome box -->
+      <div class="welcome-box drafting-form-box" style="width:100%;">
         <div class="dropzone" onclick="document.getElementById('draftingFile').click()" style="border:2px dashed #cbd5e1; background:#f8fafc; border-radius:12px; padding:16px; text-align:center; cursor:pointer; opacity:0.9;">
           <i class="fa-solid fa-file-arrow-up" style="font-size:20px; color:#94a3b8;"></i>
           <div style="font-weight:600; margin-top:4px; color:#64748b; font-size:14px;">Upload Document</div>
@@ -4351,9 +4361,10 @@ body.theme-dark .input-row span { color: #e5e7eb; }
         </div>
       </div>
 
-      <!-- Right: Instructions -->
-      <div class="upload-instructions">
-        <div class="instructions-title">Instructions</div>
+      <!-- Right: Instructions in welcome box with optional image -->
+      <div class="welcome-box drafting-instructions-box">
+        <img class="drafting-illustration" alt="Document Drafting Illustration" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360'%3E%3Crect width='100%25' height='100%25' rx='12' ry='12' fill='%23f8fafc'/%3E%3Cg fill='none' stroke='%23cbd5e1'%3E%3Crect x='40' y='40' width='560' height='280' rx='8'/%3E%3Cpath d='M120 110h400M120 150h400M120 190h320'/%3E%3C/g%3E%3C/svg%3E" />
+        <h1>Instructions</h1>
         <ol>
           <li>I. Upload a document (supported formats: .txt, .docx, .pdf, .jpg, .png).</li>
           <li>II. Click on Generate Draft.</li>
